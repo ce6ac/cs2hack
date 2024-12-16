@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cs2 knower</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 5px 0;
+        }
+        th, td {
+            padding: 5px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        td:nth-child(1) {
+            width: 25%;
+        }
+
+        td:nth-child(2) {
+            width: 15%;
+        }
+
+        td:nth-child(3), td:nth-child(5) {
+            width: 10%;
+        }
+
+        td:nth-child(4) {
+            width: 20%;
+        }
+
+        td:nth-child(6) {
+            width: 20%;
+        }
+        a {
+            color: white;
+            text-decoration: none;
+        }
+        a:hover, a:focus, a:active {
+            color: white;
+            text-decoration: none;
+        }
+        .settings-container {
+            display: block;
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            padding: 10px;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 5px;
+            box-shadow: 0px 0px 5px rgba(255, 255, 255, 0.3);
+        }
+        @media (max-height: 350px) {
+            body {
+                padding: 0;
+                margin: 0;
+                font-size: 12px;
+            }
+            .settings-container {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 id="title">offline</h1>
+    <p id="message">this server has no active session for the moment being.</p>
+    <div class="settings-container">
+        <input type="text" id="steam64" placeholder="steam64" />
+        <button onclick="saveSteam()">save</button>
+        </br>
+        <label for="show all players">
+            show all players <input type="checkbox" id="showall">
+        </label>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
