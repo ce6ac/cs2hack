@@ -2,7 +2,7 @@ const socket = io();
 
 function saveSteam() {
     const steam64Value = document.getElementById('steam64').value;
-    if (steam64Value.trim() !== "") {
+    if (steam64Value.trim() !== '') {
         localStorage.setItem('steam64', steam64Value);
     }
 }
@@ -79,8 +79,9 @@ socket.on('entityUpdate', (entities) => {
             spec_pos = entity.pos;
             break;
         }
-        else
+        else {
             spec_exists = false;
+	}
     }
 
     if (spec_exists) {
@@ -110,7 +111,7 @@ socket.on('entityUpdate', (entities) => {
                 }
                 row.appendChild(nameCell);
             
-	    		const gunCell = document.createElement('td');
+	    	const gunCell = document.createElement('td');
                 gunCell.textContent = entity.gun || '-';
                 row.appendChild(gunCell);
 
@@ -137,8 +138,8 @@ socket.on('entityUpdate', (entities) => {
         const h1 = document.querySelector('h1');
         const paragraph = document.querySelector('p');
         if (h1 && paragraph) {
-            h1.textContent = "online";
-            paragraph.textContent = "steam64 from the game required to see info."
+            h1.textContent = 'online';
+            paragraph.textContent = 'steam64 from the game required to see info.'
         }
     }
 });
