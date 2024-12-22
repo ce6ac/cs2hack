@@ -15,7 +15,7 @@ a lot could have been better, but since it works just fine and does not get dete
 to get setup, we're assuming you have a qemu/kvm gaming setup already.
 
 #### web
-didn't npm init so you'll just go into the 'web' folder and run the following to get all packages required.
+didn't npm init so you'll just go into the "web" folder and run the following to get all packages required.
 ```
 npm install express http socket.io cors path
 ```
