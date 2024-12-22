@@ -9,6 +9,7 @@ a lot could have been better, but since it works just fine and does not get dete
 - [MisterY52](https://github.com/MisterY52) - apex kvm ware
 - [AtomicBool](https://github.com/AtomicBool) - cs2 kvm ware (his implementation of memflow)
 - [nlohmann](https://github.com/nlohmann/json) - json
+- [a2x](https://github.com/a2x) - cs2 offset dumper
 - viking - all inspiration to get into qemu/kvm gaming ;)
 
 ## setup 
