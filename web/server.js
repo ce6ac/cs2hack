@@ -14,19 +14,17 @@ const io = socketIo(server, {
 
 app.use(express.static('public'));
 
-const port = 4000;
+const port = 3000;
 
-let currentEntities = [];
-let lastUpdateTime = null;
+let entities = [];
 
-// Middleware to parse JSON bodies
 app.use(express.json());
 app.use(cors());
 
 app.post('/receiver', (req, res) => {
-    currentEntities = req.body;
+    entities = req.body;
 
-    io.emit('entityUpdate', currentEntities);
+    io.emit('entityUpdate', entities);
 
     console.log("data received");
 
@@ -38,5 +36,5 @@ app.get('/info', (req, res) => {
 });
 
 server.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+    console.log(`server running on port ${port}`);
 });
