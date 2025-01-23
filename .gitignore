@@ -1,0 +1,8 @@
+.vscode/
+
+client/memflow/
+client/build
+
+web/node_modules/
+web/package-lock.json
+web/package.json

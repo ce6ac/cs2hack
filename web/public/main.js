@@ -81,65 +81,52 @@ socket.on('entityUpdate', (entities) => {
         }
         else {
             spec_exists = false;
-	}
+	    }
     }
+    assemble();
+    const tableBody = document.getElementById('entityTableBody');
+    tableBody.innerHTML = '';
 
-    if (spec_exists) {
-        assemble();
-        const tableBody = document.getElementById('entityTableBody');
-        tableBody.innerHTML = '';
+    // find the targets
+    entities.forEach(entity => {
+        if (entity.health > 0 && (entity.team == 2 || entity.team == 3)) {
 
-        // find the targets
-        entities.forEach(entity => {
-            if (entity.health > 0 && (entity.team == 2 || entity.team == 3)) {
+            const row = document.createElement('tr');
 
-                if (!showall && spec_team == entity.team) 
-                    return;
-
-                const row = document.createElement('tr');
-
-                const nameCell = document.createElement('td');
-                if (entity.steam != 0) {
-                    const link = document.createElement('a');
-                    link.textContent = entity.name || '-';
-                    link.href = `https://steamcommunity.com/profiles/${entity.steam}`;
-                    link.target = '_blank';
+            const nameCell = document.createElement('td');
+            if (entity.steam != 0) {
+                const link = document.createElement('a');
+                link.textContent = entity.name || '-';
+                link.href = `https://steamcommunity.com/profiles/${entity.steam}`;
+                link.target = '_blank';
                 
-                    nameCell.appendChild(link);
-                } else {
-                    nameCell.textContent = entity.name || '-';
-                }
-                row.appendChild(nameCell);
+                nameCell.appendChild(link);
+            } else {
+                nameCell.textContent = entity.name || '-';
+            }
+            row.appendChild(nameCell);
             
 	    	const gunCell = document.createElement('td');
-                gunCell.textContent = entity.gun || '-';
-                row.appendChild(gunCell);
+            gunCell.textContent = entity.gun || '-';
+            row.appendChild(gunCell);
 
-                const healthCell = document.createElement('td');
-                healthCell.textContent = entity.health || '-';
-                row.appendChild(healthCell);
+            const healthCell = document.createElement('td');
+            healthCell.textContent = entity.health || '-';
+            row.appendChild(healthCell);
 
-                const locCell = document.createElement('td');
-                locCell.textContent = entity.loc || '-';
-                row.appendChild(locCell);
+            const locCell = document.createElement('td');
+            locCell.textContent = entity.loc || '-';
+            row.appendChild(locCell);
 
-                const distCell = document.createElement('td');
-                distCell.textContent = (spec_health > 0) ? dist(spec_pos, entity.pos) : '-';
-                row.appendChild(distCell);
+            const distCell = document.createElement('td');
+            distCell.textContent = (spec_exists && spec_health > 0) ? dist(spec_pos, entity.pos) : '-';
+            row.appendChild(distCell);
 
-                const flagsCell = document.createElement('td');
-                flagsCell.textContent = entity.flags || '-';
-                row.appendChild(flagsCell);
+            const flagsCell = document.createElement('td');
+            flagsCell.textContent = entity.flags || '-';
+            row.appendChild(flagsCell);
 
-                tableBody.appendChild(row);
-            }
-        });
-    } else {
-        const h1 = document.querySelector('h1');
-        const paragraph = document.querySelector('p');
-        if (h1 && paragraph) {
-            h1.textContent = 'online';
-            paragraph.textContent = 'steam64 from the game required to see info.'
+            tableBody.appendChild(row);
         }
-    }
+    });
 });

@@ -11,8 +11,11 @@ $(shell cp memflow/memflow-qemu-procfs/target/release/libmemflow_qemu_procfs.so 
 %.o: %.cpp
 	$(CXX) -c -o $(OBJDIR)/$@ $< $(CXXFLAGS)
 
-cs2hack: main.o memory.o comms.o
-	$(CXX) -o $(OUTDIR)/$@ $(OBJDIR)/main.o $(OBJDIR)/memory.o $(OBJDIR)/comms.o $(CXXFLAGS) $(LIBS)
+qmp.o: include/qmp.cpp
+	$(CXX) -c -o $(OBJDIR)/$@ $< $(CXXFLAGS)
+
+cs2hack: main.o memory.o comms.o qmp.o
+	$(CXX) -o $(OUTDIR)/$@ $(OBJDIR)/main.o $(OBJDIR)/memory.o $(OBJDIR)/comms.o $(OBJDIR)/qmp.o $(CXXFLAGS) $(LIBS)
 
 .PHONY: all
 all: cs2hack
