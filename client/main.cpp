@@ -25,6 +25,8 @@ qemu::QMP qmp;
 std::string app_url = "http://localhost:3000/receiver";
 
 struct config {
+	int refresh = 250;
+
 	int fov = 20;
 	int shots = 2;
 	int smooth = 4;
@@ -34,7 +36,7 @@ struct config {
 static void run_info_esp() {
 	json jsonArray = json::array();
 	while (client_base) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(333));
+		std::this_thread::sleep_for(std::chrono::milliseconds(cfg.refresh));
 		uintptr_t entity_list, local_pawn, local_player, game_rules;
 		float game_start;
 		int local_team;
@@ -69,8 +71,6 @@ static void run_info_esp() {
 			float entity_flash;
 			bool entity_def, entity_scoped, entity_hos, entity_sneak;
 			game.read<int>(entity_pawn + m_iTeamNum, entity_team);
-			if (!cfg.team && entity_team == local_team) 
-				continue;
 			game.read<int>(entity_pawn + m_iHealth, entity_health);
 			game.read<Vector3>(entity_pawn + m_vOldOrigin, entity_pos);
 			if (entity_pos.IsZero()) continue;
@@ -98,7 +98,7 @@ static void run_info_esp() {
 			json entityJson;
 			entityJson["team"] = entity_team;
 			entityJson["health"] = entity_health;
-	   	 	entityJson["pos"] = { entity_pos.x, entity_pos.y, entity_pos.z };
+			entityJson["pos"] = { entity_pos.x, entity_pos.y, entity_pos.z };
 			entityJson["steam"] = sanitize_utf8(std::to_string(entity_steam));
 			entityJson["loc"] = sanitize_utf8(entity_loc);
 			entityJson["name"] = sanitize_utf8(entity_name);
@@ -106,28 +106,38 @@ static void run_info_esp() {
 			entityJson["gun"] = sanitize_utf8(weapon(entity_item));
 
 			jsonArray.push_back(entityJson);
-		}	
+		}
+
+		json hostJson, postJson;
+		hostJson["team"] = local_team;
+		hostJson["pos"] = { local_pos.x, local_pos.y, local_pos.z };
+
+		postJson["host"] = hostJson;
+		postJson["entities"] = jsonArray;
 		if (jsonArray.size() > 0 && game_start != 0.00f)
-			comms.post_data(jsonArray, app_url);
+			comms.post_data(postJson, app_url);
 		jsonArray.clear();
+		postJson.clear();
 	}
 }
 
 static void run_aimbot() {
-	Vector3 SCREEN_CENTER = screenSize;
-    SCREEN_CENTER.x /= 2;
-    SCREEN_CENTER.y /= 2;
-    while(true) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	// get screen center
+	Vector3 center = screenSize;
+	center.x /= 2;
+	center.y /= 2;
+
+	while(true) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 		int attack;
 		game.read<int>(client_base + attack_btn, attack);
 		if (!(attack & (1 << 0)))
 			continue;
 
-        uintptr_t local_pawn;
+		uintptr_t local_pawn;
 		game.read<uintptr_t>(client_base + dwLocalPlayerPawn, local_pawn);
-        if(!local_pawn) continue;
+		if(!local_pawn) continue;
 
 		int shots = 0;
 		game.read<int>(local_pawn + 0x23FC, shots);
@@ -139,66 +149,66 @@ static void run_aimbot() {
 		if (!local_health) continue;
 		game.read<int>(local_pawn + m_iTeamNum, local_team);
 
-        uintptr_t ent_list; 
+		uintptr_t ent_list; 
 		game.read<uintptr_t>(client_base + dwEntityList, ent_list);
-        if(!ent_list) continue;
+		if(!ent_list) continue;
 
-        view_matrix_t ViewMatrix;
+		view_matrix_t ViewMatrix;
 		game.read<view_matrix_t>(client_base + dwViewMatrix, ViewMatrix);
 
-        float closestDistance = 99999999999999.f;
-        Vector3 closestPoint;
+		float closestDistance = 99999999999999.f;
+		Vector3 closestPoint;
 
-        for  (int i = 1; i <= 64; i++) {
-            uintptr_t entry_ptr;
+		for  (int i = 1; i <= 64; i++) {
+			uintptr_t entry_ptr;
 			game.read<uintptr_t>(ent_list + (8 * (i & 0x7FFF) >> 9) + 16, entry_ptr);
-            if(!entry_ptr) continue;
-            uintptr_t controller_ptr;
+			if(!entry_ptr) continue;
+			uintptr_t controller_ptr;
 			game.read<uintptr_t>(entry_ptr + 120 * (i & 0x1FF), controller_ptr);
-            if(!controller_ptr) continue;
-            uintptr_t controller_pawn_ptr;
+			if(!controller_ptr) continue;
+			uintptr_t controller_pawn_ptr;
 			game.read<uintptr_t>(controller_ptr + m_hPlayerPawn, controller_pawn_ptr);
-            if(!controller_pawn_ptr) continue;
-            uintptr_t list_entry_ptr; 
+			if(!controller_pawn_ptr) continue;
+			uintptr_t list_entry_ptr; 
 			game.read<uintptr_t>(ent_list + 0x8 * ((controller_pawn_ptr & 0x7FFF) >> 9) + 16, list_entry_ptr);
-            if(!list_entry_ptr) continue;
+			if(!list_entry_ptr) continue;
 
-            uintptr_t player_pawn;
+			uintptr_t player_pawn;
 			game.read<uintptr_t>(list_entry_ptr + 120 * (controller_pawn_ptr & 0x1FF), player_pawn);
-            if(!player_pawn || player_pawn == local_pawn) continue;
+			if(!player_pawn || player_pawn == local_pawn) continue;
 			int entity_health, entity_team;
-           	game.read<int>(player_pawn + m_iHealth, entity_health);
-        	game.read<int>(player_pawn + m_iTeamNum, entity_team);
+		   	game.read<int>(player_pawn + m_iHealth, entity_health);
+			game.read<int>(player_pawn + m_iTeamNum, entity_team);
 			if (!cfg.team && entity_team == local_team) 
 				continue;
-            if(!(entity_health > 0)) continue;
+			if(!(entity_health > 0)) continue;
 			int bone_ids[] = { 3, 4, 5, 6 };
 			uintptr_t m_pBoneArray = 496;
-		    uintptr_t gamescene, bonearray_ptr;
+			uintptr_t gamescene, bonearray_ptr;
 			game.read<uintptr_t>(player_pawn + m_pGameSceneNode, gamescene); 
 			game.read<uintptr_t>(gamescene + m_pBoneArray, bonearray_ptr); // bone array mess
-            for(int k = 0; k < sizeof(bone_ids); k++) {
-                Vector3 playerBonePOS3D;
-				game.read<Vector3>(bonearray_ptr + bone_ids[k] * 32, playerBonePOS3D);
-                Vector3 playerBoneW2sPOS;
+			for(int k = 0; k < sizeof(bone_ids); k++) {
+				Vector3 pos3d;
+				game.read<Vector3>(bonearray_ptr + bone_ids[k] * 32, pos3d);
+				Vector3 pos2d;
 
-                if(!WorldToScreen(playerBonePOS3D, playerBoneW2sPOS, ViewMatrix)) break;
-                float cdist = sqrt((playerBoneW2sPOS.x - SCREEN_CENTER.x)*(playerBoneW2sPOS.x - SCREEN_CENTER.x) + (playerBoneW2sPOS.y - SCREEN_CENTER.y)*(playerBoneW2sPOS.y - SCREEN_CENTER.y));
-                if(closestDistance > cdist) {
-                    closestDistance = cdist;
-                    closestPoint = playerBoneW2sPOS;
-                }
-            }
-        }
+				if(!WorldToScreen(pos3d, pos2d, ViewMatrix)) break;
+				float distance = sqrt((pos2d.x - center.x)*(pos2d.x - center.x) + (pos2d.y - center.y)*(pos2d.y - center.y));
+				if(closestDistance > distance) {
+					closestDistance = distance;
+					closestPoint = pos2d;
+				}
+			}
+		}
 
-        if(closestDistance > cfg.fov) continue;
+		if(closestDistance > cfg.fov) continue;
 
-        closestPoint.x -= SCREEN_CENTER.x;
-        closestPoint.y -= SCREEN_CENTER.y;
+		closestPoint.x -= center.x;
+		closestPoint.y -= center.y;
 		closestPoint.x /= cfg.smooth;
 		closestPoint.y /= cfg.smooth * 1.5f;
-        qmp.MoveMouse(closestPoint.x, closestPoint.y);
-    }
+		qmp.MoveMouse(closestPoint.x, closestPoint.y);
+	}
 }
 
 bool get_offsets() {
@@ -207,35 +217,35 @@ bool get_offsets() {
 	std::cout << std::hex;
 
 	if (offset_json.empty())
-        return false;
+		return false;
 
-    try {
-        auto parsedData = nlohmann::json::parse(offset_json);
+	try {
+		auto parsedData = nlohmann::json::parse(offset_json);
 
-        if (parsedData.contains("client.dll")) {
+		if (parsedData.contains("client.dll")) {
 			std::cout << "global: parsing offsets.json" << std::endl;
 			dwEntityList = parsedData["client.dll"]["dwEntityList"];
 			dwGameRules = parsedData["client.dll"]["dwGameRules"];
 			dwLocalPlayerPawn = parsedData["client.dll"]["dwLocalPlayerPawn"];
 			dwViewMatrix = parsedData["client.dll"]["dwViewMatrix"];
-            std::cout << "parsed: dwEntityList 0x" << dwEntityList << std::endl;
-            std::cout << "parsed: dwGameRules 0x" << dwGameRules << std::endl;
-            std::cout << "parsed: dwLocalPlayerPawn 0x" << dwLocalPlayerPawn << std::endl;
+			std::cout << "parsed: dwEntityList 0x" << dwEntityList << std::endl;
+			std::cout << "parsed: dwGameRules 0x" << dwGameRules << std::endl;
+			std::cout << "parsed: dwLocalPlayerPawn 0x" << dwLocalPlayerPawn << std::endl;
 			std::cout << "parsed: dwViewMatrix 0x" << dwViewMatrix << std::endl;
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "Failed to parse JSON: " << e.what() << std::endl;
-    }
+		}
+	} catch (const std::exception& e) {
+		std::cerr << "Failed to parse JSON: " << e.what() << std::endl;
+	}
 
 	std::string clientdll_json = comms.get_data("https://raw.githubusercontent.com/a2x/cs2-dumper/refs/heads/main/output/client_dll.json");
 
 	if (clientdll_json.empty())
 		return false;
 
-    try {
-        auto parsedData = nlohmann::json::parse(clientdll_json);
+	try {
+		auto parsedData = nlohmann::json::parse(clientdll_json);
 
-        if (parsedData.contains("client.dll")) {
+		if (parsedData.contains("client.dll")) {
 			std::cout << "global: parsing client_dll.json" << std::endl;
 			// C_BaseEntity
 			m_iHealth 				= parsedData["client.dll"]["classes"]["C_BaseEntity"]["fields"]["m_iHealth"];
@@ -262,7 +272,7 @@ bool get_offsets() {
 			m_Item					= parsedData["client.dll"]["classes"]["C_AttributeContainer"]["fields"]["m_Item"];
 			m_iItemDefinitionIndex	= parsedData["client.dll"]["classes"]["C_EconItemView"]["fields"]["m_iItemDefinitionIndex"];
 
-            std::cout << "parsed: m_iHealth 0x" << m_iHealth << std::endl;
+			std::cout << "parsed: m_iHealth 0x" << m_iHealth << std::endl;
 			std::cout << "parsed: m_iTeamNum 0x" << m_iTeamNum << std::endl;
 			std::cout << "parsed: m_pGameSceneNode 0x" << m_pGameSceneNode << std::endl;
 			std::cout << "parsed: m_szLastPlaceName 0x" << m_szLastPlaceName << std::endl;
@@ -279,27 +289,27 @@ bool get_offsets() {
 			std::cout << "parsed: m_AttributeManager 0x" << m_AttributeManager << std::endl;
 			std::cout << "parsed: m_Item 0x" << m_Item << std::endl;
 			std::cout << "parsed: m_iItemDefinitionIndex 0x" << m_iItemDefinitionIndex << std::endl;
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "Failed to parse JSON: " << e.what() << std::endl;
-    }
+		}
+	} catch (const std::exception& e) {
+		std::cerr << "Failed to parse JSON: " << e.what() << std::endl;
+	}
 
 	std::string buttons_json = comms.get_data("https://raw.githubusercontent.com/a2x/cs2-dumper/refs/heads/main/output/buttons.json");
 
 	if (buttons_json.empty())
 		return false;
-    try {
-        auto parsedData = nlohmann::json::parse(buttons_json);
+	try {
+		auto parsedData = nlohmann::json::parse(buttons_json);
 
-        if (parsedData.contains("client.dll")) {
+		if (parsedData.contains("client.dll")) {
 			std::cout << "global: parsing buttons.json" << std::endl;
 			attack_btn = parsedData["client.dll"]["attack"];
 
-            std::cout << "parsed: attack button 0x" << attack_btn << std::endl;
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "Failed to parse JSON: " << e.what() << std::endl;
-    }
+			std::cout << "parsed: attack button 0x" << attack_btn << std::endl;
+		}
+	} catch (const std::exception& e) {
+		std::cerr << "Failed to parse JSON: " << e.what() << std::endl;
+	}
 
 	return true;
 }
@@ -323,6 +333,12 @@ int main(int argc, char *argv[]) {
 			}
 			else {
 				std::cout << "config: no url specified, running with localhost" << std::endl;
+			}
+		}
+		if (strcmp(argv[i], "-refresh") == 0) {
+			if (i + 1 < argc) {
+				cfg.refresh = strtol(argv[i + 1], NULL, 10);
+				std::cout << "config: refresh set to " << cfg.refresh << std::endl;
 			}
 		}
 		if (strcmp(argv[i], "-team") == 0) {

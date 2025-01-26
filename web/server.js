@@ -22,13 +22,11 @@ app.use(express.json());
 app.use(cors());
 
 app.post('/receiver', (req, res) => {
-    entities = req.body;
+    data = req.body;
 
-    io.emit('entityUpdate', entities);
+    io.emit('entityUpdate', data);
 
-    console.log("data received");
-
-    res.status(200).send("good");
+    res.status(200).send("data received\n");
 });
 
 app.get('/info', (req, res) => {

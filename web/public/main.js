@@ -17,7 +17,7 @@ function getSavedSteam() {
 window.onload = getSavedSteam;
 
 function assemble() {
-    const existingTable = document.querySelector('table');
+    const existingTable = document.body.querySelector('table');
 
     if (existingTable) {
         return;
@@ -62,9 +62,11 @@ function dist(pos1, pos2) {
     return Math.round(distance * 10) / 10;
 }
 
-socket.on('entityUpdate', (entities) => {
-    const showall = document.getElementById('showall').checked;
+socket.on('entityUpdate', (data) => {
     const spec_steam = document.getElementById('steam64').value;
+    const entities = data.entities;
+    const host = data.host;
+
     let spec_exists = false;
     let spec_team;
     let spec_health;
@@ -81,7 +83,7 @@ socket.on('entityUpdate', (entities) => {
         }
         else {
             spec_exists = false;
-	    }
+        }
     }
     assemble();
     const tableBody = document.getElementById('entityTableBody');
@@ -89,7 +91,7 @@ socket.on('entityUpdate', (entities) => {
 
     // find the targets
     entities.forEach(entity => {
-        if (entity.health > 0 && (entity.team == 2 || entity.team == 3)) {
+        if (entity.health > 0 && (entity.team == 2 || entity.team == 3) && entity.team != host.team) {
 
             const row = document.createElement('tr');
 
@@ -106,7 +108,7 @@ socket.on('entityUpdate', (entities) => {
             }
             row.appendChild(nameCell);
             
-	    	const gunCell = document.createElement('td');
+            const gunCell = document.createElement('td');
             gunCell.textContent = entity.gun || '-';
             row.appendChild(gunCell);
 
@@ -119,7 +121,7 @@ socket.on('entityUpdate', (entities) => {
             row.appendChild(locCell);
 
             const distCell = document.createElement('td');
-            distCell.textContent = (spec_exists && spec_health > 0) ? dist(spec_pos, entity.pos) : '-';
+            distCell.textContent = (spec_exists && spec_health > 0) ? dist(spec_pos, entity.pos) : dist(host.pos, entity.pos);
             row.appendChild(distCell);
 
             const flagsCell = document.createElement('td');
