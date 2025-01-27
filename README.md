@@ -1,6 +1,6 @@
 ## cs2-knower
 
-cs2 project for getting game data and displaying it on a web page
+cs2 project for getting game data and displaying it on a web page (also has aimbot :D)
 
 a lot could have been better, but since it works just fine and does not get detected on certain 3rd party platforms depending on qemu/kvm setup, i decided to just throw this project on github
 
@@ -8,8 +8,9 @@ a lot could have been better, but since it works just fine and does not get dete
 - [ko1N](https://github.com/ko1N), [h33p](https://github.com/h33p) and [emesare](https://github.com/emesare) - memflow
 - [MisterY52](https://github.com/MisterY52) - apex kvm ware
 - [AtomicBool](https://github.com/AtomicBool) - cs2 kvm ware (his implementation of memflow)
-- [nlohmann](https://github.com/nlohmann/json) - json
+- [nlohmann](https://github.com/nlohmann) - json
 - [a2x](https://github.com/a2x) - cs2 offset dumper
+- h3rx - qemouse (qmp wrapper)
 - viking - all inspiration to get into qemu/kvm gaming ;)
 
 ## setup 
@@ -30,9 +31,12 @@ to build the client, run the "build.sh" script to build everything including mem
 ```
 ./build.sh
 ```
-then head into the build folder and run "run.sh" script
+head into build folder, modify run.sh to configure, set -w and -h to your games resolution width and height
 ```
 cd build
+nano run.sh
+```
+finally, run "run.sh" script
+```
 ./run.sh
 ```
-(if needed, modify run.sh with ```-url``` parameter for cs2hack to use a custom url)
