@@ -121,7 +121,8 @@ socket.on('entityUpdate', (data) => {
             row.appendChild(locCell);
 
             const distCell = document.createElement('td');
-            distCell.textContent = (spec_exists && spec_health > 0) ? dist(spec_pos, entity.pos) : dist(host.pos, entity.pos);
+            // there is likely a smarter way to do this .
+            distCell.textContent = spec_exists ? ((spec_health > 0) ? dist(spec_pos, entity.pos) : '-') : ((host.health > 0) ? dist(host.pos, entity.pos) : '-');
             row.appendChild(distCell);
 
             const flagsCell = document.createElement('td');

@@ -39,12 +39,13 @@ static void run_info_esp() {
 		std::this_thread::sleep_for(std::chrono::milliseconds(cfg.refresh));
 		uintptr_t entity_list, local_pawn, local_player, game_rules;
 		float game_start;
-		int local_team;
+		int local_team, local_health;
 		game.read<uintptr_t>(client_base + dwGameRules, game_rules);
 		game.read<float>(game_rules + m_flGameStartTime, game_start);
 		game.read<uintptr_t>(client_base + dwEntityList, entity_list);
 		game.read<uintptr_t>(client_base + dwLocalPlayerPawn, local_pawn);
 		game.read<int>(local_pawn + m_iTeamNum, local_team);
+		game.read<int>(local_pawn + m_iHealth, local_health);
 		Vector3 local_pos;
 		game.read<Vector3>(local_pawn + m_vOldOrigin, local_pos);
 
@@ -110,6 +111,7 @@ static void run_info_esp() {
 
 		json hostJson, postJson;
 		hostJson["team"] = local_team;
+		hostJson["health"] = local_health;
 		hostJson["pos"] = { local_pos.x, local_pos.y, local_pos.z };
 
 		postJson["host"] = hostJson;
@@ -127,7 +129,7 @@ static void run_aimbot() {
 	center.x /= 2;
 	center.y /= 2;
 
-	while(true) {
+	while (true) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 		int attack;
@@ -205,8 +207,8 @@ static void run_aimbot() {
 
 		closestPoint.x -= center.x;
 		closestPoint.y -= center.y;
-		closestPoint.x /= cfg.smooth;
-		closestPoint.y /= cfg.smooth * 1.5f;
+		closestPoint.x /= (cfg.smooth + 1);
+		closestPoint.y /= (cfg.smooth + 1);
 		qmp.MoveMouse(closestPoint.x, closestPoint.y);
 	}
 }
