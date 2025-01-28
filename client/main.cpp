@@ -41,6 +41,10 @@ struct config {
 
 	// global
 	bool team = false;
+
+	// site conifg
+	std::string key = "key2222";
+	std::string pw = "222";
 }; static config cfg = {};
 
 static void run_info_esp() {
@@ -90,6 +94,8 @@ static void run_info_esp() {
 		hostJson["team"] = local_team;
 		hostJson["health"] = local_health;
 		hostJson["pos"] = { local_pos.x, local_pos.y, local_pos.z };
+		hostJson["key"] = cfg.key;
+		hostJson["password"] = cfg.pw;
 
 		postJson["host"] = hostJson;
 		postJson["entities"] = jsonArray;
@@ -301,6 +307,18 @@ void read_param_config(int argc, char *argv[]) {
 			}
 			else {
 				std::cout << "config: no url specified, running with localhost" << std::endl;
+			}
+		}
+		if (strcmp(argv[i], "-pw") == 0) {
+			if (i + 1 < argc) {
+				cfg.pw = argv[i + 1];
+				std::cout << "config: visit web at /" << cfg.pw << std::endl;
+			}
+		}
+		if (strcmp(argv[i], "-key") == 0) {
+			if (i + 1 < argc) {
+				cfg.key = argv[i + 1];
+				std::cout << "config: using auth key" << std::endl;
 			}
 		}
 		if (strcmp(argv[i], "-port") == 0) {

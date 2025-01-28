@@ -11,3 +11,5 @@ sudo setcap 'CAP_SYS_PTRACE=ep' cs2hack
 -cool 80 \
 -w 1440 \
 -h 1080 \
+-key <key here> \
+-pw <pw here> \
