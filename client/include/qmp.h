@@ -9,23 +9,29 @@ namespace qemu {
  * Basic interface for the QEMU Machine Protocol: a JSON-based protocol which
  * allows applications to control a QEMU instance.
  */
-class QMP {
+class qmp {
  public:
-  QMP();
+  qmp();
  
-  bool Connect(std::string_view address, uint32_t port);
+  bool setup(std::string_view address, uint32_t port);
  
-  void Disconnect();
+  void disconnect();
  
-  bool EnableCommands() const;
+  bool enable_cmds() const;
  
-  bool MoveMouse(int32_t delta_x, int32_t delta_y) const;
+  bool move_mouse(int32_t delta_x, int32_t delta_y) const;
+
+  /* own addition */
+
+  bool mouse_down() const;
+
+  bool mouse_up() const;
  
  private:
   bool connected_;
   int32_t socket_;
  
-  bool Send(std::string_view message) const;
+  bool send_cmd(std::string_view message) const;
 };
 }
  

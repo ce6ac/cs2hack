@@ -63,26 +63,26 @@ function dist(pos1, pos2) {
 }
 
 socket.on('entityUpdate', (data) => {
-    const spec_steam = document.getElementById('steam64').value;
+    const specSteam = document.getElementById('steam64').value;
     const entities = data.entities;
     const host = data.host;
 
-    let spec_exists = false;
-    let spec_team;
-    let spec_health;
-    let spec_pos;
+    let specExists = false;
+    let specTeam;
+    let specHealth;
+    let specPos;
 
     // find the spectator
     for (const entity of entities) {
-        if (spec_steam == entity.steam && spec_steam != 0) {
-            spec_exists = true;
-            spec_team = entity.team;
-            spec_health = entity.health;
-            spec_pos = entity.pos;
+        if (specSteam == entity.steam && specSteam != 0) {
+            specExists = true;
+            specTeam = entity.team;
+            specHealth = entity.health;
+            specPos = entity.pos;
             break;
         }
         else {
-            spec_exists = false;
+            specExists = false;
         }
     }
     assemble();
@@ -122,7 +122,7 @@ socket.on('entityUpdate', (data) => {
 
             const distCell = document.createElement('td');
             // there is likely a smarter way to do this .
-            distCell.textContent = spec_exists ? ((spec_health > 0) ? dist(spec_pos, entity.pos) : '-') : ((host.health > 0) ? dist(host.pos, entity.pos) : '-');
+            distCell.textContent = specExists ? ((specHealth > 0) ? dist(specPos, entity.pos) : '-') : ((host.health > 0) ? dist(host.pos, entity.pos) : '-');
             row.appendChild(distCell);
 
             const flagsCell = document.createElement('td');

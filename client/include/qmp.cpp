@@ -8,11 +8,11 @@
  
 #include <spdlog/spdlog.h>
  
-qemu::QMP::QMP()
+qemu::qmp::qmp()
     : connected_(false),
       socket_(0) {}
  
-bool qemu::QMP::Connect(std::string_view address, uint32_t port) {
+bool qemu::qmp::setup(std::string_view address, uint32_t port) {
   if (connected_) {
     spdlog::warn("connection is already open");
     printf("connection is already open");
@@ -47,7 +47,7 @@ bool qemu::QMP::Connect(std::string_view address, uint32_t port) {
   return true;
 }
  
-void qemu::QMP::Disconnect() {
+void qemu::qmp::disconnect() {
   if (!connected_) {
     return;
   }
@@ -56,21 +56,21 @@ void qemu::QMP::Disconnect() {
   connected_ = false;
 }
  
-bool qemu::QMP::EnableCommands() const {
+bool qemu::qmp::enable_cmds() const {
   if (!connected_) {
     return false;
   }
  
-  std::string_view message{R"({ "execute": "qmp_capabilities" })"};
-  return Send(message);
+  std::string_view cmd { R"({ "execute": "qmp_capabilities" })" };
+  return send_cmd(cmd);
 }
  
-bool qemu::QMP::MoveMouse(int32_t delta_x, int32_t delta_y) const {
+bool qemu::qmp::move_mouse(int32_t delta_x, int32_t delta_y) const {
   if (!connected_) {
     return false;
   }
  
-  std::string message{
+  std::string cmd {
     "{\n"
     "  \"execute\": \"input-send-event\",\n"
     "  \"arguments\": {\n"
@@ -94,10 +94,62 @@ bool qemu::QMP::MoveMouse(int32_t delta_x, int32_t delta_y) const {
     "}"
   };
  
-  return Send(message);
+  return send_cmd(cmd);
 }
  
-bool qemu::QMP::Send(std::string_view message) const {
-  size_t sent = send(socket_, message.data(), message.size(), 0);
-  return sent == message.size();
+bool qemu::qmp::send_cmd(std::string_view cmd) const {
+  size_t sent = send(socket_, cmd.data(), cmd.size(), 0);
+  return sent == cmd.size();
+}
+
+/* own addition */
+
+bool qemu::qmp::mouse_down() const {
+  if (!connected_) {
+    return false;
+  }
+ 
+  std::string cmd {
+    "{\n"
+    "  \"execute\": \"input-send-event\",\n"
+    "  \"arguments\": {\n"
+    "    \"events\": [\n"
+    "      {\n"
+    "        \"type\": \"btn\",\n"
+    "        \"data\": {\n"
+    "          \"down\": true,\n"
+    "          \"button\": \"left\"\n"
+    "        }\n"
+    "      }\n"
+    "    ]\n"
+    "  }\n"
+    "}"
+  };
+ 
+  return send_cmd(cmd);
+}
+
+bool qemu::qmp::mouse_up() const {
+  if (!connected_) {
+    return false;
+  }
+ 
+  std::string cmd {
+    "{\n"
+    "  \"execute\": \"input-send-event\",\n"
+    "  \"arguments\": {\n"
+    "    \"events\": [\n"
+    "      {\n"
+    "        \"type\": \"btn\",\n"
+    "        \"data\": {\n"
+    "          \"down\": false,\n"
+    "          \"button\": \"left\"\n"
+    "        }\n"
+    "      }\n"
+    "    ]\n"
+    "  }\n"
+    "}"
+  };
+ 
+  return send_cmd(cmd);
 }

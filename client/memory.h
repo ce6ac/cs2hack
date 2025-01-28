@@ -1,3 +1,4 @@
+#pragma once
 #include "memflow_win32.h"
 #include <cstring>
 #include <stdio.h>
@@ -83,6 +84,8 @@ public:
 
 	uint64_t get_module_address(const char* proc_name, const char* module_name);
 };
+
+extern memory mem;
 
 template<typename T>
 inline bool memory::read(uint64_t address, T& out)
