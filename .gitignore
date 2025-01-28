@@ -1,7 +1,8 @@
 .vscode/
 
 client/memflow/
-client/build
+client/build/
+client/build/run.sh
 
 web/node_modules/
 web/package-lock.json
