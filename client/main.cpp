@@ -43,8 +43,8 @@ struct config {
 	bool team = false;
 
 	// site conifg
-	std::string key = "key2222";
-	std::string pw = "222";
+	std::string key = "l33ts3cr3t";
+	std::string pw = "";
 }; static config cfg = {};
 
 static void run_info_esp() {
@@ -61,15 +61,19 @@ static void run_info_esp() {
 		for (int i = 1; i < 64; i++)
 		{	
 			uintptr_t entity_controller = ent.get_entity_controller(i, entity_list);
-			if (!entity_controller) continue;
+			if (!entity_controller) 
+				continue;
+
 			uintptr_t entity_pawn = ent.get_entity_pawn(entity_controller, entity_list);
-			if (!entity_pawn) continue;
+			if (!entity_pawn)
+				continue;
 
 			Vector3 entity_pos = ent.get_pos(entity_pawn);
 			int entity_team = ent.get_team(entity_pawn);
 			int entity_health = ent.get_health(entity_pawn);
 
-			if (ent.get_pos(entity_pawn).IsZero()) continue;
+			if (ent.get_pos(entity_pawn).IsZero()) 
+				continue;
 
 			std::string entity_flags = "";
 			if (ent.is_scoped(entity_pawn)) entity_flags = "scoped";
@@ -95,12 +99,12 @@ static void run_info_esp() {
 		hostJson["health"] = local_health;
 		hostJson["pos"] = { local_pos.x, local_pos.y, local_pos.z };
 		hostJson["key"] = cfg.key;
-		hostJson["password"] = cfg.pw;
+		hostJson["endpoint"] = cfg.pw;
 
 		postJson["host"] = hostJson;
 		postJson["entities"] = jsonArray;
 		if (jsonArray.size() > 0 && cl.get_game_start() != 0.00f)
-			comms.post_data(postJson, app_url);
+			std::cout << "webapp: " << comms.post_data(postJson, app_url) << std::endl;
 		jsonArray.clear();
 		postJson.clear();
 	}
@@ -115,13 +119,16 @@ static void run_aim_trigger() {
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 		uintptr_t local_pawn = cl.get_local_pawn();
-		if(!local_pawn) continue;
+		if(!local_pawn) 
+			continue;
 
 		int local_health = ent.get_team(local_pawn);
-		if (!local_health) continue;
+		if (!local_health) 
+			continue;
 		int entity_id = ent.get_crosshair_id(local_pawn);
 		int local_team = ent.get_team(local_pawn);
 
+		// triggerbot
 		if (cl.use_button_down() && entity_id) {
 			uintptr_t entity_list = cl.get_entity_list();
 			uintptr_t entity_pawn = ent.get_entity_pawn_from_id(entity_id, entity_list);
@@ -138,7 +145,7 @@ static void run_aim_trigger() {
 				qmp.mouse_up();
 				std::this_thread::sleep_for(std::chrono::milliseconds(random_value(cfg.cooldown, cfg.cooldown + 40)));
 			}
-		} else {
+		} else { // aimbot
 			if (!cl.attack_button_down())
 				continue;
 
@@ -146,41 +153,48 @@ static void run_aim_trigger() {
 				continue;
 
 			uintptr_t entity_list = cl.get_entity_list();
-			if (!entity_list) continue;
+			if (!entity_list) 
+				continue;
 
 			view_matrix_t view_matrix = cl.get_view_matrix();
 
 			float closest_dist = 99999999999999.f;
 			Vector3 closest_point;
 
-			for  (int i = 1; i <= 64; i++) {
+			for (int i = 1; i <= 64; i++) {
 				uintptr_t entity_controller = ent.get_entity_controller(i, entity_list);
-				if (!entity_controller) continue;
+				if (!entity_controller) 
+					continue;
 				uintptr_t entity_pawn = ent.get_entity_pawn(entity_controller, entity_list);
-				if(!entity_pawn || entity_pawn == local_pawn) continue;
+				if (!entity_pawn || entity_pawn == local_pawn)
+					continue;
 
 				int entity_health = ent.get_health(entity_pawn);
 				int entity_team = ent.get_team(entity_pawn);
 
-				if (!cfg.team && entity_team == local_team) continue;
-				if(!(entity_health > 0)) continue;
+				if (!cfg.team && entity_team == local_team) 
+					continue;
+				if (!(entity_health > 0)) 
+					continue;
 
 				int bones[] = { 3, 4, 5, 6 };
 				uintptr_t bonearray_ptr = ent.get_bone_array_ptr(entity_pawn);
 
-				for(int j = 0; j < sizeof(bones); j++) {
+				for (int j = 0; j < sizeof(bones); j++) {
 					Vector3 pos2d, pos3d = ent.get_3d_bone_pos(bonearray_ptr, bones[j]);
 					if(!WorldToScreen(pos3d, pos2d, view_matrix))
 						break;
 					float distance = sqrt((pos2d.x - center.x)*(pos2d.x - center.x) + (pos2d.y - center.y)*(pos2d.y - center.y));
-					if(closest_dist > distance) {
+					if (closest_dist > distance) {
 						closest_dist = distance;
 						closest_point = pos2d;
 					}
 				}
 			}
 
-			if(closest_dist > cfg.fov) continue;
+			if (closest_dist > cfg.fov)
+				continue;
+
 			int random = random_value(-1, 1);
 			closest_point.x -= center.x + random;
 			closest_point.y -= center.y + (random * -1);
@@ -212,9 +226,11 @@ bool get_offsets() {
 			std::cout << "parsed: dwGameRules 0x" << offset.dwGameRules << std::endl;
 			std::cout << "parsed: dwLocalPlayerPawn 0x" << offset.dwLocalPlayerPawn << std::endl;
 			std::cout << "parsed: dwViewMatrix 0x" << offset.dwViewMatrix << std::endl;
+		} else {
+			return false;
 		}
 	} catch (const std::exception& e) {
-		std::cerr << "Failed to parse JSON: " << e.what() << std::endl;
+		std::cerr << "parsed: " << "error " << e.what() << std::endl;
 	}
 
 	std::string clientdll_json = comms.get_data("https://raw.githubusercontent.com/a2x/cs2-dumper/refs/heads/main/output/client_dll.json");
@@ -271,9 +287,11 @@ bool get_offsets() {
 			std::cout << "parsed: m_AttributeManager 0x" << offset.m_AttributeManager << std::endl;
 			std::cout << "parsed: m_Item 0x" << offset.m_Item << std::endl;
 			std::cout << "parsed: m_iItemDefinitionIndex 0x" << offset.m_iItemDefinitionIndex << std::endl;
+		} else {
+			return false;
 		}
 	} catch (const std::exception& e) {
-		std::cerr << "Failed to parse JSON: " << e.what() << std::endl;
+		std::cerr << "parsed: " << "error " << e.what() << std::endl;
 	}
 
 	std::string buttons_json = comms.get_data("https://raw.githubusercontent.com/a2x/cs2-dumper/refs/heads/main/output/buttons.json");
@@ -289,9 +307,11 @@ bool get_offsets() {
 			offset.use_btn = parsed_data["client.dll"]["use"];
 			std::cout << "parsed: attack button 0x" << offset.attack_btn << std::endl;
 			std::cout << "parsed: use button 0x" << offset.use_btn << std::endl;
+		} else {
+			return false;
 		}
 	} catch (const std::exception& e) {
-		std::cerr << "Failed to parse JSON: " << e.what() << std::endl;
+		std::cerr << "parsed: " << "error " << e.what() << std::endl;
 	}
 
 	return true;
@@ -309,10 +329,10 @@ void read_param_config(int argc, char *argv[]) {
 				std::cout << "config: no url specified, running with localhost" << std::endl;
 			}
 		}
-		if (strcmp(argv[i], "-pw") == 0) {
+		if (strcmp(argv[i], "-ep") == 0) {
 			if (i + 1 < argc) {
 				cfg.pw = argv[i + 1];
-				std::cout << "config: visit web at /" << cfg.pw << std::endl;
+				std::cout << "config: valid endpoint set to /" << cfg.pw << std::endl;
 			}
 		}
 		if (strcmp(argv[i], "-key") == 0) {
@@ -405,6 +425,11 @@ int main(int argc, char *argv[]) {
 						aim_thread.detach();
 					} else {
 						std::cout << "global: could not connect to qmp, aim unavailable" << std::endl;
+					}
+					if (!cfg.pw.empty()) {
+						size_t last_slash = app_url.find_last_of("/");
+						std::string base_url = (last_slash != std::string::npos) ? app_url.substr(0, last_slash).append("/") : "/";
+						std::cout << "global: web app should be at " << base_url << cfg.pw << std::endl;
 					}
 					run_info_esp();
 					qmp.disconnect();

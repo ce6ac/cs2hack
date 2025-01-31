@@ -11,27 +11,27 @@ namespace qemu {
  */
 class qmp {
  public:
-  qmp();
+	qmp();
  
-  bool setup(std::string_view address, uint32_t port);
+	bool setup(std::string_view address, uint32_t port);
  
-  void disconnect();
+	void disconnect();
  
-  bool enable_cmds() const;
+	bool enable_cmds() const;
  
-  bool move_mouse(int32_t delta_x, int32_t delta_y) const;
+	bool move_mouse(int32_t delta_x, int32_t delta_y) const;
 
-  /* own addition */
+	/* own addition */
 
-  bool mouse_down() const;
+	bool mouse_down() const;
 
-  bool mouse_up() const;
+	bool mouse_up() const;
  
  private:
-  bool connected_;
-  int32_t socket_;
+	bool connected_;
+	int32_t socket_;
  
-  bool send_cmd(std::string_view message) const;
+	bool send_cmd(std::string_view message) const;
 };
 }
  

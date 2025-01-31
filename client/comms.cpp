@@ -37,8 +37,10 @@ std::string communications::get_data(const std::string& url) {
 	return resp;
 }
 
-void communications::post_data(const nlohmann::json& data, const std::string& url) {
+std::string communications::post_data(const nlohmann::json& data, const std::string& url) {
 	CURL* curl = curl_easy_init();
+	std::string response;
+
 	if (curl) {
 		CURLcode res;
 		std::string jsonString = data.dump();
@@ -52,9 +54,13 @@ void communications::post_data(const nlohmann::json& data, const std::string& ur
 		if (headers == nullptr) {
 			std::cerr << "curl fail: failed to alloc memory for headers" << std::endl;
 			curl_easy_cleanup(curl);
-			return;
+			return "";
 		}
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+		// Capture response data
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, this->write_callback);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
 
 		res = curl_easy_perform(curl);
 		if (res != CURLE_OK) {
@@ -66,4 +72,6 @@ void communications::post_data(const nlohmann::json& data, const std::string& ur
 	} else {
 		std::cerr << "curl fail: failed to init curl" << std::endl;
 	}
+
+	return response;
 }

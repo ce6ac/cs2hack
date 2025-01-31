@@ -16,9 +16,17 @@ app.use(express.static('public'));
 
 const port = 3000;
 
-// set these two when setting up
-let key = "set_a_key"; // use -key in run.sh on the client to authorize
-let password = "set_a_pw"; // this can be set on client with -pw param, it'll set the working url
+// use -key in run.sh on the client to authorize
+let key = "l33ts3cr3t"; // default hardcoded to l33ts3cr3t
+// this can be set on client with -pw param, it'll set the working url
+let endpoint = "secret"; // default hardcoded to be /secret
+
+const args = process.argv.slice(2); // Skip the first two elements
+
+const keyIndex = args.indexOf("-key");
+if (keyIndex !== -1 && keyIndex + 1 < args.length) {
+    key = args[keyIndex + 1];
+}
 
 let data = [];
 
@@ -30,20 +38,20 @@ app.post('/receiver', (req, res) => {
 
     if (data.host && data.host.key === key) {
         io.emit('entityUpdate', data);
-        if (password != data.host.password) {
-            password = data.host.password;
-            console.log("pw changed");
+        if (endpoint != data.host.endpoint && data.host.endpoint != "") {
+            endpoint = data.host.endpoint;
+            console.log("valid endpoint updated");
         }
-        res.status(200).send("data received\n");
+        res.status(200).send("data received");
     } else {
         data = [];
-        res.status(401).send("unauthorized\n");
+        res.status(401).send("unauthorized");
     }
 });
 
-app.get('/:pw', (req, res) => {
-    const { pw } = req.params;
-    if (pw === password) {
+app.get('/:ep', (req, res) => {
+    const { ep } = req.params;
+    if (ep === endpoint) {
         res.sendFile(path.join(__dirname, 'html', 'info.html'));
     } else {
         res.sendFile(path.join(__dirname, 'html', '404.html'));
@@ -55,5 +63,6 @@ app.get('/', (req, res) => {
 });
 
 server.listen(port, () => {
-    console.log(`server running on port ${port}`);
+    console.log(`server: running on port ${port}`);
+    console.log(`server: post key set to "${key}"`);
 });
