@@ -1,8 +1,8 @@
-## cs2-knower
+## cs2hack
 
-cs2 project for getting game data and displaying it on a web page (also has aimbot :D)
+cs2 game hack including info esp and aim/trigger powered by qmp inputs
 
-a lot could have been better, but since it works just fine and does not get detected on certain 3rd party platforms depending on qemu/kvm setup, i decided to just throw this project on github
+a lot could have been better, but since it works just fine and does not get detected on certain 3rd party platforms depending on qemu/kvm setup, i decided to just throw this project on github.
 
 ### credits
 - [ko1N](https://github.com/ko1N), [h33p](https://github.com/h33p) and [emesare](https://github.com/emesare) - memflow
@@ -17,7 +17,7 @@ a lot could have been better, but since it works just fine and does not get dete
 to get setup, we're assuming you have a qemu/kvm gaming setup already.
 
 #### web
-didn't npm init so you'll just go into the "web" folder and run the following to get all packages required.
+go into the "web" folder and run the following to get all packages required.
 ```
 npm install express http socket.io cors path
 ```
@@ -31,7 +31,7 @@ to build the client, run the "build.sh" script to build everything including mem
 ```
 ./build.sh
 ```
-head into build folder, modify run.sh to configure, set -w and -h to your games resolution width and height
+head into build folder, modify run.sh to configure, set -w and -h to your games resolution width and height (default -w 1920 -h 1080)
 ```
 cd build
 nano run.sh
