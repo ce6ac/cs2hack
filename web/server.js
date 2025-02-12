@@ -17,15 +17,15 @@ app.use(express.static('public'));
 const port = 3000;
 
 // use -key in run.sh on the client to authorize
-let key = "l33ts3cr3t"; // default hardcoded to l33ts3cr3t
+let postKey = 'l33ts3cr3t'; // default hardcoded to l33ts3cr3t - create a better solution later
 // this can be set on client with -pw param, it'll set the working url
-let endpoint = "secret"; // default hardcoded to be /secret
+let endpoint = 'secret'; // default hardcoded to be /secret
 
 const args = process.argv.slice(2); // Skip the first two elements
 
-const keyIndex = args.indexOf("-key");
+const keyIndex = args.indexOf('-key');
 if (keyIndex !== -1 && keyIndex + 1 < args.length) {
-    key = args[keyIndex + 1];
+    postKey = args[keyIndex + 1];
 }
 
 let data = [];
@@ -36,16 +36,16 @@ app.use(cors());
 app.post('/receiver', (req, res) => {
     data = req.body;
 
-    if (data.host && data.host.key === key) {
+    if (data.host && data.host.key === postKey) {
         io.emit('entityUpdate', data);
-        if (endpoint != data.host.endpoint && data.host.endpoint != "") {
+        if (endpoint != data.host.endpoint && data.host.endpoint != '') {
             endpoint = data.host.endpoint;
-            console.log("valid endpoint updated");
+            console.log('valid endpoint updated');
         }
-        res.status(200).send("data received");
+        res.status(200).send('data received');
     } else {
         data = [];
-        res.status(401).send("unauthorized");
+        res.status(401).send('unauthorized');
     }
 });
 
@@ -64,5 +64,7 @@ app.get('/', (req, res) => {
 
 server.listen(port, () => {
     console.log(`server: running on port ${port}`);
-    console.log(`server: post key set to "${key}"`);
+    if (postKey) {
+        console.log(`server: post key set to '${postKey}'`);
+    }
 });
