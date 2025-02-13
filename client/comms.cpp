@@ -25,13 +25,13 @@ std::string communications::get_data(const std::string& url) {
 		res = curl_easy_perform(curl);
 
 		if (res != CURLE_OK) {
-			std::cerr << "curl fail: " << curl_easy_strerror(res) << std::endl;
+			std::cerr << "webapp: (curl error) - " << curl_easy_strerror(res) << std::endl;
 		} else if (resp.empty()) {
-			std::cerr << "curl fail: no data received from the server." << std::endl;
+			std::cerr << "webapp: no data received from the server" << std::endl;
 		}
 		curl_easy_cleanup(curl);
 	} else {
-		std::cerr << "curl fail: failed to init curl" << std::endl;
+		std::cerr << "webapp: failed to initialize curl locally" << std::endl;
 	}
 
 	return resp;
@@ -52,25 +52,23 @@ std::string communications::post_data(const nlohmann::json& data, const std::str
 		struct curl_slist* headers = nullptr;
 		headers = curl_slist_append(headers, "Content-Type: application/json");
 		if (headers == nullptr) {
-			std::cerr << "curl fail: failed to alloc memory for headers" << std::endl;
+			std::cerr << "webapp: failed to alloc memory for headers in curl" << std::endl;
 			curl_easy_cleanup(curl);
 			return "";
 		}
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-
-		// Capture response data
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, this->write_callback);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
 
 		res = curl_easy_perform(curl);
 		if (res != CURLE_OK) {
-			std::cerr << "curl fail: " << curl_easy_strerror(res) << std::endl;
+			std::cerr << "webapp: (curl error) - " << curl_easy_strerror(res) << std::endl;
 		}
 
 		curl_slist_free_all(headers);
 		curl_easy_cleanup(curl);
 	} else {
-		std::cerr << "curl fail: failed to init curl" << std::endl;
+		std::cerr << "webapp: failed to initialize curl locally" << std::endl;
 	}
 
 	return response;

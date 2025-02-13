@@ -183,6 +183,95 @@ uint16_t entity::get_weapon(uintptr_t pawn) {
 
 /* weapon related */
 
+int weapons::get_type(short id) {
+	/*
+	-1 = none, defined by game
+	0 = knife / hands / nades, non firing weapons
+	1 = pistol
+	2 = rifle + autosniper
+	3 = single shot sniper
+	4 = shot guns
+	5 = smg 
+	6 = lmg
+	*/
+	switch (id) {
+		case 1:
+			return 1; // "deagle";
+		case 2:
+			return 1; // "dualies";
+		case 3:
+			return 1; // "fiveseven";
+		case 4:
+			return 1; // "glock";
+		case 7:
+			return 2; // "ak47";
+		case 8:
+			return 2; // "aug";
+		case 9:
+			return 3; // "awp";
+		case 10:
+			return 2; // "famas";
+		case 11:
+			return 2; // "g3sg1";
+		case 13:
+			return 2; // "galil";
+		case 14:
+			return 6; // "m249";
+		case 16:
+			return 2; // "m4a4";
+		case 17:
+			return 5; // "mac10";
+		case 19:
+			return 5; // "p90";
+		case 23:
+			return 5; // "mp5sd";
+		case 24:
+			return 5; // "ump45";
+		case 25:
+			return 4; // "xm1014";
+		case 26:
+			return 5; // "ppbizon";
+		case 27:
+			return 4; // "mag7";
+		case 28:
+			return 6; // "negev";
+		case 29:
+			return 4; // "sawedoff";
+		case 30:
+			return 1; // "tec9";
+		case 31:
+			return 7; // "taser";
+		case 32:
+			return 1; // "p2000";
+		case 33:
+			return 5; // "mp7";
+		case 34:
+			return 5; // "mp9";
+		case 35:
+			return 4; // "nova";
+		case 36:
+			return 1; // "p250";
+		case 38:
+			return 2; // "scar20";
+		case 39:
+			return 2; // "sg556";
+		case 40:
+			return 3; // "scout";
+		case 60:
+			return 2; // "m4a1s";
+		case 61:
+			return 1; // "usps";
+		case 63:
+			return 1; // "cz75";
+		case 64:
+			return 1; // "revolver";
+		case -1:
+			return -1; // "none";
+		default:
+			return 0;
+	}
+}
+
 std::string weapons::get_weapon(short id) {
 	switch (id) {
 		case 1:

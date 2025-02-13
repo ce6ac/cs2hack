@@ -8,7 +8,6 @@ int random_value(int min, int max) {
 	return min + (rand() % (max - min + 1));
 }
 
-
 std::string sanitize_utf8(const std::string& input) {
 	std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
 	try {

@@ -89,6 +89,7 @@ extern entity ent;
 
 class weapons {
 public:
+	int get_type(short id);
 	std::string get_weapon(short id);
 };
 

@@ -125,8 +125,19 @@ static void run_aim_trigger() {
 		int local_health = ent.get_team(local_pawn);
 		if (!local_health) 
 			continue;
+
+		//uintptr_t weaponvdata;
+		//uint32_t seed;
+		//mem.read<uintptr_t>(local_pawn + 0x368 + 0x8, weaponvdata);
+		//mem.read<uint32_t>(weaponvdata + 0xDCC, seed);
+		//std::cout << seed << std::endl;
+		//
 		int entity_id = ent.get_crosshair_id(local_pawn);
 		int local_team = ent.get_team(local_pawn);
+
+		short weapon_type = wpn.get_type(ent.get_weapon(local_pawn));
+		if (weapon_type < 1)
+			continue;
 
 		// triggerbot
 		if (cl.use_button_down() && entity_id) {
@@ -198,8 +209,12 @@ static void run_aim_trigger() {
 			int random = random_value(-1, 1);
 			closest_point.x -= center.x + random;
 			closest_point.y -= center.y + (random * -1);
-			closest_point.x /= (cfg.smooth + 1);
-			closest_point.y /= (cfg.smooth + 1);
+
+			if (cfg.smooth) {
+				closest_point.x /= (cfg.smooth + 1);
+				closest_point.y /= (cfg.smooth + 1);
+			}
+			
 			qmp.move_mouse(closest_point.x, closest_point.y);
 		}
 	}
