@@ -12,7 +12,7 @@ sudo setcap 'CAP_SYS_PTRACE=ep' cs2hack
 -smooth 6 \
 -shots 2 \
 -delay 25 \
--cool 80 \
+-cooldown 80 \
 -w 1440 \
 -h 1080 \
 -ep secret \

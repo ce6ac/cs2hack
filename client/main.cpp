@@ -391,7 +391,7 @@ void read_param_config(int argc, char *argv[]) {
 				cfg.delay = strtol(argv[i + 1], NULL, 10);
 			}
 		}
-		if (strcmp(argv[i], "-cool") == 0) {
+		if (strcmp(argv[i], "-cooldown") == 0) {
 			if (i + 1 < argc) {
 				cfg.cooldown = strtol(argv[i + 1], NULL, 10);
 			}
