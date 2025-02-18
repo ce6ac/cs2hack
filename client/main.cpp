@@ -23,7 +23,7 @@ weapons wpn;
 offsets offset;
 qemu::qmp qmp;
 
-std::string app_url = "http://localhost:3000/receiver";
+std::string app_url = "http://localhost:3000";
 
 struct config {
 	// general
@@ -44,7 +44,7 @@ struct config {
 
 	// site conifg
 	std::string key = "l33ts3cr3t";
-	std::string pw = "";
+	std::string ep = "";
 }; static config cfg = {};
 
 static void run_info_esp() {
@@ -99,12 +99,12 @@ static void run_info_esp() {
 		hostJson["health"] = local_health;
 		hostJson["pos"] = { local_pos.x, local_pos.y, local_pos.z };
 		hostJson["key"] = cfg.key;
-		hostJson["endpoint"] = cfg.pw;
+		hostJson["endpoint"] = cfg.ep;
 
 		postJson["host"] = hostJson;
 		postJson["entities"] = jsonArray;
 		if (jsonArray.size() > 0 && cl.get_game_start() != 0.00f)
-			std::cout << "webapp: " << comms.post_data(postJson, app_url) << std::endl;
+			std::cout << "webapp: " << comms.post_data(postJson, app_url + "/receiver") << std::endl;
 		jsonArray.clear();
 		postJson.clear();
 	}
@@ -126,12 +126,6 @@ static void run_aim_trigger() {
 		if (!local_health) 
 			continue;
 
-		//uintptr_t weaponvdata;
-		//uint32_t seed;
-		//mem.read<uintptr_t>(local_pawn + 0x368 + 0x8, weaponvdata);
-		//mem.read<uint32_t>(weaponvdata + 0xDCC, seed);
-		//std::cout << seed << std::endl;
-		//
 		int entity_id = ent.get_crosshair_id(local_pawn);
 		int local_team = ent.get_team(local_pawn);
 
@@ -193,9 +187,11 @@ static void run_aim_trigger() {
 
 				for (int j = 0; j < sizeof(bones); j++) {
 					Vector3 pos2d, pos3d = ent.get_3d_bone_pos(bonearray_ptr, bones[j]);
-					if(!WorldToScreen(pos3d, pos2d, view_matrix))
+					if(!world_to_screen(pos3d, pos2d, view_matrix))
 						break;
-					float distance = sqrt((pos2d.x - center.x)*(pos2d.x - center.x) + (pos2d.y - center.y)*(pos2d.y - center.y));
+						
+					float distance = sqrt((pos2d.x - center.x) * (pos2d.x - center.x) 
+										+ (pos2d.y - center.y) * (pos2d.y - center.y));
 					if (closest_dist > distance) {
 						closest_dist = distance;
 						closest_point = pos2d;
@@ -346,14 +342,17 @@ void read_param_config(int argc, char *argv[]) {
 		}
 		if (strcmp(argv[i], "-ep") == 0) {
 			if (i + 1 < argc) {
-				cfg.pw = argv[i + 1];
-				std::cout << "config: valid endpoint set to /" << cfg.pw << std::endl;
+				cfg.ep = argv[i + 1];
+				std::cout << "config: valid endpoint set to /" << cfg.ep << std::endl;
 			}
 		}
 		if (strcmp(argv[i], "-key") == 0) {
 			if (i + 1 < argc) {
 				cfg.key = argv[i + 1];
-				std::cout << "config: using auth key" << std::endl;
+				std::cout << "config: found post key" << std::endl;
+				json key;
+				key["key"] = cfg.key;
+				std::cout << "webapp: " << comms.post_data(key, app_url + "/testkey") << std::endl;
 			}
 		}
 		if (strcmp(argv[i], "-port") == 0) {
@@ -441,10 +440,8 @@ int main(int argc, char *argv[]) {
 					} else {
 						std::cout << "global: could not connect to qmp, aim unavailable" << std::endl;
 					}
-					if (!cfg.pw.empty()) {
-						size_t last_slash = app_url.find_last_of("/");
-						std::string base_url = (last_slash != std::string::npos) ? app_url.substr(0, last_slash).append("/") : "/";
-						std::cout << "global: web app should be at " << base_url << cfg.pw << std::endl;
+					if (!cfg.ep.empty()) {
+						std::cout << "global: info page should be " << app_url << "/" << cfg.ep << std::endl;
 					}
 					run_info_esp();
 					qmp.disconnect();

@@ -73,17 +73,16 @@ socket.on('entityUpdate', (data) => {
     let specPos;
 
     // find the spectator
-    if (specSteam == entity.steam && specSteam != 0) {
-        for (const entity of entities) {
+    for (const entity of entities) {
+        if (specSteam == entity.steam && specSteam != 0) {
             specExists = true;
             specTeam = entity.team;
             specHealth = entity.health;
             specPos = entity.pos;
             break;
+        } else {
+            specExists = false;
         }
-    }
-    else {
-        specExists = false;
     }
 
     assemble(); // assemble the table if it does not exist

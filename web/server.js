@@ -45,7 +45,20 @@ app.post('/receiver', (req, res) => {
         res.status(200).send('data received');
     } else {
         data = [];
-        res.status(401).send('unauthorized');
+        res.status(401).send('unauthorized, make sure post key is correct');
+        console.log('server: someone is trying to send data with a bad key');
+    }
+});
+
+app.post('/testkey', (req, res) => {
+    let data = req.body;
+
+    if (data.key === postKey) {
+        res.status(200).send('good key');
+        console.log('server: someone tested key with result good');
+    } else {
+        res.status(401).send('bad');
+        console.log('server: someone tested key with result bad');
     }
 });
 

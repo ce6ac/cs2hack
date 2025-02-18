@@ -1,5 +1,6 @@
 #include <random>
 #include "vector.h"
+#include "../game.h"
 
 Vector3 screen_size(1920.f, 1080.f, 0); // default, most common res ?
 
@@ -9,8 +10,8 @@ int random_value(int min, int max) {
 }
 
 std::string sanitize_utf8(const std::string& input) {
-	std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
 	try {
+		std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
 		std::wstring wide_str = converter.from_bytes(input);
 		return converter.to_bytes(wide_str);
 	} catch (const std::range_error&) {
@@ -19,7 +20,7 @@ std::string sanitize_utf8(const std::string& input) {
 }
 
 // from uc or smth idk
-inline bool WorldToScreen(const Vector3& worldPos, Vector3& screenPos, const view_matrix_t& viewMatrix)
+inline bool world_to_screen(const Vector3& worldPos, Vector3& screenPos, const view_matrix_t& viewMatrix)
 {
 	float clip_x = worldPos.x * viewMatrix.matrix[0][0] + worldPos.y * viewMatrix.matrix[0][1] + worldPos.z * viewMatrix.matrix[0][2] + viewMatrix.matrix[0][3];
 	float clip_y = worldPos.x * viewMatrix.matrix[1][0] + worldPos.y * viewMatrix.matrix[1][1] + worldPos.z * viewMatrix.matrix[1][2] + viewMatrix.matrix[1][3];

@@ -57,11 +57,12 @@ view_matrix_t client::get_view_matrix() {
 
 uintptr_t entity::get_entity_controller(int player, uintptr_t entity_list) {
 	uintptr_t entry_ptr;
-	mem.read<uintptr_t>(entity_list + (0x8 * (player & 0x7FFF) >> 9) + 0x10, entry_ptr);
-	if(!entry_ptr) return 0;
+	mem.read<uintptr_t>(entity_list + (0x8 * ((player & 0x7FFF) >> 9) + 0x10), entry_ptr);
+	if (!entry_ptr) return 0;
 	uintptr_t controller_ptr;
 	mem.read<uintptr_t>(entry_ptr + 0x78 * (player & 0x1FF), controller_ptr);
-
+	if (!controller_ptr) return 0;
+	
 	return controller_ptr;
 }
 
@@ -80,8 +81,10 @@ uintptr_t entity::get_entity_pawn(uintptr_t controller, uintptr_t entity_list) {
 uintptr_t entity::get_entity_pawn_from_id(int entity, uintptr_t entity_list) {
 	uintptr_t entry_ptr;
 	mem.read<uintptr_t>(entity_list + (0x8 * (entity >> 9) + 0x10), entry_ptr);
+	if (!entry_ptr) return 0;
 	uintptr_t controller_ptr;
 	mem.read<uintptr_t>(entry_ptr + 0x78 * (entity & 0x1FF), controller_ptr);
+	if (!controller_ptr) return 0;
 
 	return controller_ptr;
 }

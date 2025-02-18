@@ -1,8 +1,11 @@
 #!/bin/bash
 
+# example run.sh for cs2hack
+
 sudo setcap 'CAP_SYS_PTRACE=ep' cs2hack
 ./cs2hack \
--url https://cs2hack.com/receiver \
+-url https://cs2hack.com \
+-key "l33ts3cr3t" \
 -port 1337 \
 -refresh 350 \
 -fov 20 \
