@@ -11,7 +11,7 @@ a lot could have been better, but since it works just fine and does not get dete
 - [nlohmann](https://github.com/nlohmann) - json
 - [a2x](https://github.com/a2x) - cs2 offset dumper
 - h3rx - qemouse (qmp wrapper)
-- viking - all inspiration to get into qemu/kvm gaming ;)
+- [horror](https://github.com/horrified-dev) - all inspiration to get into qemu/kvm gaming ;)
 
 ## setup 
 to get setup, we're assuming you have a qemu/kvm gaming setup already
@@ -32,12 +32,25 @@ to build the client, run the "build.sh" script to build everything including mem
 ./build.sh
 ```
 head into build folder, modify run.sh to configure
-set -w and -h to your games resolution width and height (default -w 1920 -h 1080)
 ```
 cd build
 nano run.sh
 ```
+(for aimbot and triggerbot) configure qmp for mouse input you'll need to modify your vm xml
+```
+<domain>
+  ...
+  <qemu:commandline>
+    <qemu:arg value="-qmp"/>
+    <qemu:arg value="tcp:127.0.0.1:6448,server,nowait"/>
+  </qemu:commandline>
+</domain>
+```
 finally, run "run.sh" script
 ```
 ./run.sh
+```
+triggerbot key is your use key in-game, to bind it use cs2 command
+```
+bind X +use
 ```

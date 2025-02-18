@@ -42,7 +42,6 @@ public:
 	std::ptrdiff_t m_Item;
 	std::ptrdiff_t m_iItemDefinitionIndex;
 
-
 	// gamerules
 	std::ptrdiff_t m_flGameStartTime;
 };

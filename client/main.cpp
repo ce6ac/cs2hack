@@ -438,7 +438,7 @@ int main(int argc, char *argv[]) {
 						aim_thread = std::thread(run_aim_trigger);
 						aim_thread.detach();
 					} else {
-						std::cout << "global: could not connect to qmp, aim unavailable" << std::endl;
+						std::cout << "global: could not connect to qmp, aim/trigger unavailable" << std::endl;
 					}
 					if (!cfg.ep.empty()) {
 						std::cout << "global: info page should be " << app_url << "/" << cfg.ep << std::endl;
