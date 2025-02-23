@@ -62,7 +62,7 @@ function dist(pos1, pos2) {
     return Math.round(distance * 10) / 10;
 }
 
-// get the page path and remove the dash
+// get the page path and remove the slash
 const ep = window.location.pathname.slice(1);
 
 socket.on(ep, (data) => {
