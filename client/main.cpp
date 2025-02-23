@@ -340,13 +340,13 @@ void read_param_config(int argc, char *argv[]) {
 				std::cout << "config: no url specified, running with localhost" << std::endl;
 			}
 		}
-		if (strcmp(argv[i], "-ep") == 0) {
+		else if (strcmp(argv[i], "-ep") == 0) {
 			if (i + 1 < argc) {
 				cfg.ep = argv[i + 1];
 				std::cout << "config: valid endpoint set to /" << cfg.ep << std::endl;
 			}
 		}
-		if (strcmp(argv[i], "-key") == 0) {
+		else if (strcmp(argv[i], "-key") == 0) {
 			if (i + 1 < argc) {
 				cfg.key = argv[i + 1];
 				std::cout << "config: found post key" << std::endl;
@@ -355,53 +355,53 @@ void read_param_config(int argc, char *argv[]) {
 				std::cout << "webapp: " << comms.post_data(key, app_url + "/testkey") << std::endl;
 			}
 		}
-		if (strcmp(argv[i], "-port") == 0) {
+		else if (strcmp(argv[i], "-port") == 0) {
 			if (i + 1 < argc) {
 				cfg.port = strtol(argv[i + 1], NULL, 10);
 				std::cout << "config: using qmp port " << cfg.port << std::endl;
 			}
 		}
-		if (strcmp(argv[i], "-refresh") == 0) {
+		else if (strcmp(argv[i], "-refresh") == 0) {
 			if (i + 1 < argc) {
 				cfg.refresh = strtol(argv[i + 1], NULL, 10);
 				std::cout << "config: refresh set to " << cfg.refresh << std::endl;
 			}
 		}
-		if (strcmp(argv[i], "-team") == 0) {
+		else if (strcmp(argv[i], "-team") == 0) {
 			std::cout << "config: including teammates" << std::endl;
 			cfg.team = true;
 		}
-		if (strcmp(argv[i], "-fov") == 0) {
+		else if (strcmp(argv[i], "-fov") == 0) {
 			if (i + 1 < argc) {
 				cfg.fov = strtol(argv[i + 1], NULL, 10);
 			}
 		}
-		if (strcmp(argv[i], "-smooth") == 0) {
+		else if (strcmp(argv[i], "-smooth") == 0) {
 			if (i + 1 < argc) {
 				cfg.smooth = strtol(argv[i + 1], NULL, 10);
 			}
 		}
-		if (strcmp(argv[i], "-shots") == 0) {
+		else if (strcmp(argv[i], "-shots") == 0) {
 			if (i + 1 < argc) {
 				cfg.shots = strtol(argv[i + 1], NULL, 10);
 			}
 		}
-		if (strcmp(argv[i], "-delay") == 0) {
+		else if (strcmp(argv[i], "-delay") == 0) {
 			if (i + 1 < argc) {
 				cfg.delay = strtol(argv[i + 1], NULL, 10);
 			}
 		}
-		if (strcmp(argv[i], "-cooldown") == 0) {
+		else if (strcmp(argv[i], "-cooldown") == 0) {
 			if (i + 1 < argc) {
 				cfg.cooldown = strtol(argv[i + 1], NULL, 10);
 			}
 		}
-		if (strcmp(argv[i], "-w") == 0) {
+		else if (strcmp(argv[i], "-w") == 0) {
 			if (i + 1 < argc) {
 				screen_size.x = strtol(argv[i + 1], NULL, 10);
 			}
 		}
-		if (strcmp(argv[i], "-h") == 0) {
+		else if (strcmp(argv[i], "-h") == 0) {
 			if (i + 1 < argc) {
 				screen_size.y = strtol(argv[i + 1], NULL, 10);
 			}

@@ -62,7 +62,10 @@ function dist(pos1, pos2) {
     return Math.round(distance * 10) / 10;
 }
 
-socket.on('entityUpdate', (data) => {
+// get the page path and remove the dash
+const ep = window.location.pathname.slice(1);
+
+socket.on(ep, (data) => {
     const specSteam = document.getElementById('steam64').value;
     const entities = data.entities;
     const host = data.host;
