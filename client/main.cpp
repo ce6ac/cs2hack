@@ -207,8 +207,8 @@ static void run_aim_trigger() {
 			closest_point.y -= center.y + (random * -1);
 
 			if (cfg.smooth) {
-				closest_point.x /= (cfg.smooth + 1);
-				closest_point.y /= (cfg.smooth + 1);
+				closest_point.x /= (cfg.smooth + 2 + random);
+				closest_point.y /= (cfg.smooth + 2 - random);
 			}
 			
 			qmp.move_mouse(closest_point.x, closest_point.y);

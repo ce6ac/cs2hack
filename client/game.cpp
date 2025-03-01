@@ -102,13 +102,13 @@ int entity::get_health(uintptr_t pawn) {
 }
 
 std::string entity::get_location(uintptr_t pawn) {
-	static char place[18];
+	char place[18];
 	mem.read_array<char>(pawn + offset.m_szLastPlaceName, &place[0], 18);
 	return place;
 }
 
 std::string entity::get_name(uintptr_t controller) {
-	static char name[64];
+	char name[128];
 	mem.read_array<char>(controller + offset.m_iszPlayerName, &name[0], 128);
 	return name;
 }
