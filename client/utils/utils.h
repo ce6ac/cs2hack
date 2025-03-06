@@ -4,9 +4,20 @@
 
 Vector3 screen_size(1920.f, 1080.f, 0); // default, most common res ?
 
-int random_value(int min, int max) {
-	std::srand(static_cast<unsigned int>(std::time(nullptr)));
-	return min + (rand() % (max - min + 1));
+void seed_random() {
+    std::srand(static_cast<unsigned int>(
+        std::chrono::high_resolution_clock::now().time_since_epoch().count() % UINT_MAX
+    ));
+}
+
+int random_int(int min, int max) {
+    seed_random();
+    return min + (rand() % (max - min + 1));
+}
+
+float random_float(float min, float max) {
+    seed_random();
+    return min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX) / (max - min));
 }
 
 std::string sanitize_utf8(const std::string& input) {

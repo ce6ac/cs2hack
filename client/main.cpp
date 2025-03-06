@@ -31,9 +31,9 @@ struct config {
 	int refresh = 250;
 
 	// aim
-	int fov = 20;
+	float fov = 15.f;
 	int shots = 2;
-	int smooth = 4;
+	float smooth = 4.f;
 
 	// trigger
 	int delay = 33;
@@ -144,11 +144,11 @@ static void run_aim_trigger() {
 				continue;
 
 			if (entity_health > 0 && (entity_team == 2 || entity_team == 3)) {
-				std::this_thread::sleep_for(std::chrono::milliseconds(random_value(cfg.delay, cfg.delay + 20)));
+				std::this_thread::sleep_for(std::chrono::milliseconds(random_int(cfg.delay, cfg.delay + 20)));
 				qmp.mouse_down();
-				std::this_thread::sleep_for(std::chrono::milliseconds(random_value(25, 35)));
+				std::this_thread::sleep_for(std::chrono::milliseconds(random_int(25, 35)));
 				qmp.mouse_up();
-				std::this_thread::sleep_for(std::chrono::milliseconds(random_value(cfg.cooldown, cfg.cooldown + 40)));
+				std::this_thread::sleep_for(std::chrono::milliseconds(random_int(cfg.cooldown, cfg.cooldown + 40)));
 			}
 		} else { // aimbot
 			if (!cl.attack_button_down())
@@ -183,6 +183,7 @@ static void run_aim_trigger() {
 					continue;
 
 				int bones[] = { 3, 4, 5, 6 };
+
 				uintptr_t bonearray_ptr = ent.get_bone_array_ptr(entity_pawn);
 
 				for (int j = 0; j < sizeof(bones); j++) {
@@ -192,6 +193,7 @@ static void run_aim_trigger() {
 						
 					float distance = sqrt((pos2d.x - center.x) * (pos2d.x - center.x) 
 										+ (pos2d.y - center.y) * (pos2d.y - center.y));
+										
 					if (closest_dist > distance) {
 						closest_dist = distance;
 						closest_point = pos2d;
@@ -202,13 +204,12 @@ static void run_aim_trigger() {
 			if (closest_dist > cfg.fov)
 				continue;
 
-			int random = random_value(-1, 1);
-			closest_point.x -= center.x + random;
-			closest_point.y -= center.y + (random * -1);
+			closest_point.x -= center.x + random_float(-0.5f, 0.5f);
+			closest_point.y -= center.y + (-random_float(-0.5f, 0.5f));
 
 			if (cfg.smooth) {
-				closest_point.x /= (cfg.smooth + 2 + random);
-				closest_point.y /= (cfg.smooth + 2 - random);
+				closest_point.x /= (cfg.smooth + 2.f) + (-random_float(-0.5f, 0.5f));
+				closest_point.y /= (cfg.smooth + 2.f) + random_float(-0.5f, 0.5f);
 			}
 			
 			qmp.move_mouse(closest_point.x, closest_point.y);
@@ -373,12 +374,12 @@ void read_param_config(int argc, char *argv[]) {
 		}
 		else if (strcmp(argv[i], "-fov") == 0) {
 			if (i + 1 < argc) {
-				cfg.fov = strtol(argv[i + 1], NULL, 10);
+				cfg.fov = strtof(argv[i + 1], NULL);
 			}
 		}
 		else if (strcmp(argv[i], "-smooth") == 0) {
 			if (i + 1 < argc) {
-				cfg.smooth = strtol(argv[i + 1], NULL, 10);
+				cfg.smooth = strtof(argv[i + 1], NULL);
 			}
 		}
 		else if (strcmp(argv[i], "-shots") == 0) {
