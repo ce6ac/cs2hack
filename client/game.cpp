@@ -146,6 +146,13 @@ Vector3 entity::get_3d_bone_pos(uintptr_t bonearray, int bone) {
 	return pos3d;
 }
 
+uint32_t entity::is_spotted(uintptr_t pawn) {
+	// m_bSpottedByMask = 0xC
+	uint32_t spotted;
+	mem.read<uint32_t>(pawn + offset.m_entitySpottedState + 0xC, spotted);
+	return spotted;
+}
+
 bool entity::is_scoped(uintptr_t pawn) {
 	bool b;
 	mem.read<bool>(pawn + offset.m_bIsScoped, b);

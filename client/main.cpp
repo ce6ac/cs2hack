@@ -34,6 +34,7 @@ struct config {
 	float fov = 15.f;
 	int shots = 2;
 	float smooth = 4.f;
+	bool spotted = false;
 
 	// trigger
 	int delay = 33;
@@ -56,6 +57,7 @@ static void run_info_esp() {
 
 		int local_team = ent.get_team(cl.get_local_pawn());
 		int local_health = ent.get_health(local_pawn);
+		int local_index;
 		Vector3 local_pos = ent.get_pos(local_pawn);
 
 		for (int i = 1; i < 64; i++)
@@ -67,6 +69,9 @@ static void run_info_esp() {
 			uintptr_t entity_pawn = ent.get_entity_pawn(entity_controller, entity_list);
 			if (!entity_pawn)
 				continue;
+			
+			if (entity_pawn == local_pawn)
+				local_index = i;
 
 			Vector3 entity_pos = ent.get_pos(entity_pawn);
 			int entity_team = ent.get_team(entity_pawn);
@@ -76,6 +81,7 @@ static void run_info_esp() {
 				continue;
 
 			std::string entity_flags = "";
+			if (ent.is_spotted(entity_pawn) & (uint32_t(1) << (local_index - 1))) entity_flags = "spotted";
 			if (ent.is_scoped(entity_pawn)) entity_flags = "scoped";
 			if (ent.is_flashed(entity_pawn)) entity_flags = "flashed";
 			if (ent.is_defusing(entity_pawn)) entity_flags = "defusing";
@@ -165,13 +171,18 @@ static void run_aim_trigger() {
 
 			float closest_dist = 99999999999999.f;
 			Vector3 closest_point;
+			int local_index;
 
 			for (int i = 1; i <= 64; i++) {
 				uintptr_t entity_controller = ent.get_entity_controller(i, entity_list);
 				if (!entity_controller) 
 					continue;
 				uintptr_t entity_pawn = ent.get_entity_pawn(entity_controller, entity_list);
-				if (!entity_pawn || entity_pawn == local_pawn)
+				if (!entity_pawn)
+					continue;
+				if (entity_pawn == local_pawn)
+					local_index = i;
+				if (cfg.spotted && !(ent.is_spotted(entity_pawn) & (uint32_t(1) << (local_index - 1))))
 					continue;
 
 				int entity_health = ent.get_health(entity_pawn);
@@ -208,8 +219,8 @@ static void run_aim_trigger() {
 			closest_point.y -= center.y + (-random_float(-0.5f, 0.5f));
 
 			if (cfg.smooth) {
-				closest_point.x /= (cfg.smooth + 2.f) + (-random_float(-0.5f, 0.5f));
-				closest_point.y /= (cfg.smooth + 2.f) + random_float(-0.5f, 0.5f);
+				closest_point.x /= (cfg.smooth + 1.1f) + (-random_float(-0.5f, 0.5f));
+				closest_point.y /= (cfg.smooth + 1.1f) + random_float(-0.5f, 0.5f);
 			}
 			
 			qmp.move_mouse(closest_point.x, closest_point.y);
@@ -261,9 +272,10 @@ bool get_offsets() {
 			offset.m_pGameSceneNode 		= parsed_data["client.dll"]["classes"]["C_BaseEntity"]["fields"]["m_pGameSceneNode"];
 			// C_CSPlayerPawn
 			offset.m_szLastPlaceName		= parsed_data["client.dll"]["classes"]["C_CSPlayerPawn"]["fields"]["m_szLastPlaceName"];
+			offset.m_entitySpottedState 	= parsed_data["client.dll"]["classes"]["C_CSPlayerPawn"]["fields"]["m_entitySpottedState"];
+			offset.m_bIsScoped				= parsed_data["client.dll"]["classes"]["C_CSPlayerPawn"]["fields"]["m_bIsScoped"];
 			offset.m_bIsDefusing			= parsed_data["client.dll"]["classes"]["C_CSPlayerPawn"]["fields"]["m_bIsDefusing"];
 			offset.m_bIsGrabbingHostage		= parsed_data["client.dll"]["classes"]["C_CSPlayerPawn"]["fields"]["m_bIsGrabbingHostage"];
-			offset.m_bIsScoped				= parsed_data["client.dll"]["classes"]["C_CSPlayerPawn"]["fields"]["m_bIsScoped"];
 			offset.m_iShotsFired			= parsed_data["client.dll"]["classes"]["C_CSPlayerPawn"]["fields"]["m_iShotsFired"];
 			// CBasePlayerController
 			offset.m_iszPlayerName 			= parsed_data["client.dll"]["classes"]["CBasePlayerController"]["fields"]["m_iszPlayerName"];
@@ -285,9 +297,10 @@ bool get_offsets() {
 			std::cout << "parsed: m_iTeamNum 0x" << offset.m_iTeamNum << std::endl;
 			std::cout << "parsed: m_pGameSceneNode 0x" << offset.m_pGameSceneNode << std::endl;
 			std::cout << "parsed: m_szLastPlaceName 0x" << offset.m_szLastPlaceName << std::endl;
+			std::cout << "parsed: m_entitySpottedState 0x" << offset.m_entitySpottedState << std::endl;
+			std::cout << "parsed: m_bIsScoped 0x" << offset.m_bIsScoped << std::endl;
 			std::cout << "parsed: m_bIsDefusing 0x" << offset.m_bIsDefusing << std::endl;
 			std::cout << "parsed: m_bIsGrabbingHostage 0x" << offset.m_bIsGrabbingHostage << std::endl;
-			std::cout << "parsed: m_bIsScoped 0x" << offset.m_bIsScoped << std::endl;
 			std::cout << "parsed: m_iShotsFired 0x" << offset.m_iShotsFired << std::endl;
 			std::cout << "parsed: m_iszPlayerName 0x" << offset.m_iszPlayerName << std::endl;
 			std::cout << "parsed: m_steamID 0x" << offset.m_steamID << std::endl;
@@ -387,6 +400,9 @@ void read_param_config(int argc, char *argv[]) {
 				cfg.shots = strtol(argv[i + 1], NULL, 10);
 			}
 		}
+		else if (strcmp(argv[i], "-vischeck") == 0) {
+			cfg.spotted = true;
+		}
 		else if (strcmp(argv[i], "-delay") == 0) {
 			if (i + 1 < argc) {
 				cfg.delay = strtol(argv[i + 1], NULL, 10);
@@ -411,6 +427,7 @@ void read_param_config(int argc, char *argv[]) {
 	std::cout << "config: aim fov " << cfg.fov << std::endl;
 	std::cout << "config: aim smooth " << cfg.smooth << std::endl;
 	std::cout << "config: aim shots " << cfg.shots << std::endl;
+	std::cout << "config: aim vischeck " << cfg.spotted << std::endl;
 	std::cout << "config: trigger delay " << cfg.delay << std::endl;
 	std::cout << "config: trigger cooldown " << cfg.cooldown << std::endl;
 	std::cout << "config: resolution width " << screen_size.x << std::endl;

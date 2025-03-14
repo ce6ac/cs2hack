@@ -6,11 +6,10 @@ a lot could have been better, but since it works just fine and does not get dete
 
 ### credits
 - [ko1N](https://github.com/ko1N), [h33p](https://github.com/h33p) and [emesare](https://github.com/emesare) - memflow
-- [MisterY52](https://github.com/MisterY52) - apex kvm ware
 - [AtomicBool](https://github.com/AtomicBool) - cs2 kvm ware (his implementation of memflow)
 - [nlohmann](https://github.com/nlohmann) - json
 - [a2x](https://github.com/a2x) - cs2 offset dumper
-- h3rx - qemouse (qmp wrapper)
+- h3rx - qemouse (qmp wrapper found on UC)
 - [horror](https://github.com/horrified-dev) - all inspiration to get into qemu/kvm gaming ;)
 
 ## setup 

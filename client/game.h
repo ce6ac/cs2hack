@@ -28,6 +28,7 @@ public:
 	std::ptrdiff_t m_steamID;
 	std::ptrdiff_t m_hPlayerPawn;
 	std::ptrdiff_t m_flFlashOverlayAlpha;
+	std::ptrdiff_t m_entitySpottedState;
 	std::ptrdiff_t m_bIsScoped;
 	std::ptrdiff_t m_bIsDefusing;
 	std::ptrdiff_t m_bIsGrabbingHostage;
@@ -77,6 +78,7 @@ public:
 	int get_shots_fired(uintptr_t local_pawn);
 	uintptr_t get_bone_array_ptr(uintptr_t pawn);
 	Vector3 get_3d_bone_pos(uintptr_t bonearray, int bone);
+	uint32_t is_spotted(uintptr_t pawn);
 	bool is_defusing(uintptr_t pawn);
 	bool is_scoped(uintptr_t pawn);
 	bool is_rescuing(uintptr_t pawn);

@@ -5,23 +5,19 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
- 
-#include <spdlog/spdlog.h>
- 
+
 qemu::qmp::qmp()
 		: connected_(false),
 			socket_(0) {}
  
 bool qemu::qmp::setup(std::string_view address, uint32_t port) {
 	if (connected_) {
-		spdlog::warn("connection is already open");
 		printf("qmp: connection is already open");
 		return true;
 	}
  
 	socket_ = socket(AF_INET, SOCK_STREAM, 0);
 	if (socket_ == -1) {
-		spdlog::critical("could not create socket descriptor");
 		printf("qmp: could not create socket descriptor");
 		return false;
 	}
@@ -37,7 +33,6 @@ bool qemu::qmp::setup(std::string_view address, uint32_t port) {
 			reinterpret_cast<const sockaddr *>(&socket_address),
 			sizeof(socket_address));
 	if (result == -1) {
-		spdlog::critical("could not connect to {}", address);
 		printf("qmp: could not connect to {}");
 		close(socket_);
 		return false;
