@@ -1,27 +1,59 @@
 const socket = io();
 
-function saveSteam() {
+function saveSettings() {
     const steam64Value = document.getElementById('steam64').value;
     if (steam64Value.trim() !== '') {
         localStorage.setItem('steam64', steam64Value);
     }
+
+    const container = document.getElementById('playerlist');
+    if (container) {
+        const position = {
+            left: container.style.left,
+            top: container.style.top,
+            width: container.style.width
+        };
+        localStorage.setItem('playerlist', JSON.stringify(position)); // Save position & width
+    }
 }
 
-function getSavedSteam() {
+function getSettings() {
     const steam64Value = localStorage.getItem('steam64');
     if (steam64Value) {
         document.getElementById('steam64').value = steam64Value;
     }
 }
 
-window.onload = getSavedSteam;
+window.onload = getSettings;
 
 function assemble() {
-    const existingTable = document.body.querySelector('table');
+    const existingPlayerList = document.getElementById('playerlist');
 
-    if (existingTable) {
+    if (existingPlayerList) {
         return;
     }
+
+    const container = document.createElement('div');
+    container.id = 'playerlist';
+
+    const savedSettings = localStorage.getItem('playerlist');
+    if (savedSettings) {
+        const { left, top, width } = JSON.parse(savedSettings);
+        if (left && top) {
+            container.style.left = left;
+            container.style.top = top;
+        }
+        if (width) {
+            container.style.width = width;
+        }
+    }
+
+    const title = document.createElement('div');
+    title.className = 'title';
+    title.textContent = 'playerlist';
+
+    const resizer = document.createElement('div');
+    resizer.className = 'resizer';
 
     const h1 = document.querySelector('h1');
     const paragraph = document.querySelector('p');
@@ -51,7 +83,107 @@ function assemble() {
     tbody.id = 'entityTableBody';
     table.appendChild(tbody);
 
-    document.body.appendChild(table);
+    container.appendChild(title);
+    container.appendChild(table);
+    container.appendChild(resizer);
+    document.body.appendChild(container);
+
+    makeDraggable(container, title);
+    makeResizable(container, resizer);
+}
+
+function makeDraggable(container, handle) {
+    let isDragging = false;
+
+    handle.onmousedown = function (event) {
+        event.preventDefault();
+        isDragging = true;
+        let shiftX = event.clientX - container.getBoundingClientRect().left;
+        let shiftY = event.clientY - container.getBoundingClientRect().top;
+
+        function moveAt(pageX, pageY) {
+            let newX = pageX - shiftX;
+            let newY = pageY - shiftY;
+
+            // limits
+            newX = Math.max(0, Math.min(window.innerWidth - container.offsetWidth, newX));
+            newY = Math.max(0, Math.min(window.innerHeight - container.offsetHeight, newY));
+
+            container.style.left = `${newX}px`;
+            container.style.top = `${newY}px`;
+        }
+
+        function onMouseMove(event) {
+            if (!isDragging) return;
+            moveAt(event.pageX, event.pageY);
+        }
+
+        function stopDragging() {
+            isDragging = false;
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', stopDragging);
+        }
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', stopDragging);
+
+        document.addEventListener('keydown', function escHandler(event) {
+            if (event.key === "Escape") {
+                stopDragging();
+                document.removeEventListener('keydown', escHandler);
+            }
+        });
+    };
+
+    handle.ondragstart = function () {
+        return false;
+    };
+}
+
+function makeResizable(container, handle) {
+    let isResizing = false;
+
+    handle.onmousedown = function (event) {
+        event.preventDefault();
+        isResizing = true;
+        let startX = event.clientX;
+        let startWidth = container.offsetWidth;
+
+        function onMouseMove(event) {
+            if (!isResizing) return;
+            let newWidth = startWidth + (event.clientX - startX);
+
+            // limits
+            let maxWidth = window.innerWidth - container.offsetLeft;
+            if (newWidth >= 400 && newWidth < maxWidth) {
+                container.style.width = `${newWidth}px`;
+            }
+        }
+
+        function stopResizing() {
+            isResizing = false;
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', stopResizing);
+        }
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', stopResizing);
+
+        document.addEventListener('keydown', function escHandler(event) {
+            if (event.key === "Escape") {
+                stopResizing();
+                document.removeEventListener('keydown', escHandler);
+            }
+        });
+    };
+}
+
+function reset() {
+    let container = document.getElementById('playerlist');
+
+    if (container && window.innerHeight <= 400 && container.hasAttribute('style')) {
+        container.removeAttribute('style');
+    }
 }
 
 function dist(pos1, pos2) {
@@ -137,3 +269,5 @@ socket.on(ep, (data) => {
         }
     });
 });
+
+window.addEventListener('resize', reset); // resizer ghetto fix
