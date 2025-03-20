@@ -187,6 +187,9 @@ function reset() {
     if (container && window.innerHeight <= 400 && container.hasAttribute('style')) {
         container.removeAttribute('style');
     }
+    if (container && window.innerWidth <= 940 && container.hasAttribute('style')) {
+        container.removeAttribute('style');
+    }
 }
 
 function dist(pos1, pos2) {
@@ -260,8 +263,7 @@ socket.on(ep, (data) => {
             row.appendChild(locCell);
 
             const distCell = document.createElement('td');
-            // there is likely a smarter way to do this .
-            distCell.textContent = specExists ? ((specHealth > 0) ? dist(specPos, entity.pos) : '-') : ((host.health > 0) ? dist(host.pos, entity.pos) : '-');
+            distCell.textContent = specExists ? ((specHealth > 0) ? dist(specPos, entity.pos) : '-') : '-';
             row.appendChild(distCell);
 
             const flagsCell = document.createElement('td');
@@ -273,4 +275,4 @@ socket.on(ep, (data) => {
     });
 });
 
-window.addEventListener('resize', reset); // resizer ghetto fix
+window.addEventListener('resize', reset);
