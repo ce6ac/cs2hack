@@ -98,6 +98,9 @@ function makeDraggable(container, handle) {
     handle.onmousedown = function (event) {
         event.preventDefault();
         isDragging = true;
+
+        const headerHeight = document.querySelector('.bar').offsetHeight - 1; // get header height
+
         let shiftX = event.clientX - container.getBoundingClientRect().left;
         let shiftY = event.clientY - container.getBoundingClientRect().top;
 
@@ -107,7 +110,7 @@ function makeDraggable(container, handle) {
 
             // limits
             newX = Math.max(0, Math.min(window.innerWidth - container.offsetWidth, newX));
-            newY = Math.max(0, Math.min(window.innerHeight - container.offsetHeight, newY));
+            newY = Math.max(headerHeight, Math.min(window.innerHeight - container.offsetHeight, newY));
 
             container.style.left = `${newX}px`;
             container.style.top = `${newY}px`;
