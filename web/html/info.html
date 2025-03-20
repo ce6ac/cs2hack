@@ -48,6 +48,7 @@
             padding: 5px;
             cursor: grab;
             font-weight: bold;
+            border-bottom: 1px solid black;
         }
         .resizer {
             width: 10px;
@@ -58,20 +59,46 @@
             cursor: w-resize;
         }
         .settings-container {
-            display: block;
             position: absolute;
             bottom: 10px;
             right: 10px;
             padding: 10px;
-            text-align: center;
-            background: rgb(44, 44, 44);
+            background: rgb(26, 26, 26);
             border: 1px solid black;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             z-index: 999;
+        }
+        .settings-container input[type="text"] {
+            background-color: rgb(44, 44, 44);
+            color: white;
+            border: 1px solid black;
+            border-radius: 4px;
+            padding: 6px 10px;
+            font-size: 14px;
+            outline: none;
+            width: 150px;
+        }
+        .settings-container button {
+            background-color: rgb(44, 44, 44);
+            color: white;
+            border: 1px solid black;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .settings-container button:hover {
+            background-color: rgb(33, 33, 33);
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 5px 0;
+            margin-top: 1px;
             margin-bottom: 0;
         }
         th, td {
