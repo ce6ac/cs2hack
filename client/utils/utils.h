@@ -44,8 +44,8 @@ inline bool world_to_screen(const Vector3& worldPos, Vector3& screenPos, const v
 	float ndc_x = clip_x / clip_w;
 	float ndc_y = clip_y / clip_w;
 
-	screenPos.x = (screen_size.x / 2 * ndc_x) + (ndc_x + 1440 / 2);
-	screenPos.y = -(screen_size.y / 2 * ndc_y) + (ndc_y + 1080 / 2);
+	screenPos.x = (screen_size.x / 2 * ndc_x) + (ndc_x + screen_size.x / 2);
+	screenPos.y = -(screen_size.y / 2 * ndc_y) + (ndc_y + screen_size.y / 2);
 
 	return true;
 }

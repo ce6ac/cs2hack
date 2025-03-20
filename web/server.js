@@ -72,5 +72,7 @@ server.listen(port, () => {
     console.log(`server: running on port ${port}`);
     if (postKey) {
         console.log(`server: post key set to '${postKey}'`);
+    } else {
+        console.log('server: no key set (!)');
     }
 });

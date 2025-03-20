@@ -145,6 +145,9 @@ static void run_aim_trigger() {
 			uintptr_t entity_pawn = ent.get_entity_pawn_from_id(entity_id, entity_list);
 			int entity_team = ent.get_team(entity_pawn);
 			int entity_health = ent.get_health(entity_pawn);
+			Vector3 entity_pos = ent.get_pos(entity_pawn);
+			if (entity_pos.IsZero())
+				continue;
 			
 			if (!cfg.team && local_team == entity_team)
 				continue;
@@ -187,6 +190,9 @@ static void run_aim_trigger() {
 
 				int entity_health = ent.get_health(entity_pawn);
 				int entity_team = ent.get_team(entity_pawn);
+				Vector3 entity_pos = ent.get_pos(entity_pawn);
+				if (entity_pos.IsZero())
+					continue;
 
 				if (!cfg.team && entity_team == local_team) 
 					continue;
@@ -199,7 +205,10 @@ static void run_aim_trigger() {
 
 				for (int j = 0; j < sizeof(bones); j++) {
 					Vector3 pos2d, pos3d = ent.get_3d_bone_pos(bonearray_ptr, bones[j]);
-					if(!world_to_screen(pos3d, pos2d, view_matrix))
+					if (pos3d.IsZero())
+						break;
+
+					if (!world_to_screen(pos3d, pos2d, view_matrix))
 						break;
 						
 					float distance = sqrt((pos2d.x - center.x) * (pos2d.x - center.x) 
