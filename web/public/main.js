@@ -231,9 +231,11 @@ socket.on(ep, (data) => {
     const tableBody = document.getElementById('entityTableBody');
     tableBody.innerHTML = '';
 
+    let targets = 0;
+
     // find the targets
     entities.forEach(entity => {
-        if (entity.health > 0 && (entity.team == 2 || entity.team == 3) && entity.team != host.team) {
+        if (entity.health > 0 && (entity.team == 2 || entity.team == 3) && host.team != entity.team) {
 
             const row = document.createElement('tr');
 
@@ -271,8 +273,17 @@ socket.on(ep, (data) => {
             row.appendChild(flagsCell);
 
             tableBody.appendChild(row);
+
+            targets++;
         }
     });
+    if (targets == 0) {
+        const row = document.createElement('tr');
+        const nameCell = document.createElement('td');
+        nameCell.textContent = 'no alive players';
+        row.appendChild(nameCell);
+        tableBody.appendChild(row);
+    }
 });
 
 window.addEventListener('resize', reset);
