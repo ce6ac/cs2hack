@@ -49,70 +49,81 @@ struct config {
 }; static config cfg = {};
 
 static void run_info_esp() {
-	json jsonArray = json::array();
+	json json_array = json::array();
 	while (true) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(cfg.refresh));
-		uintptr_t entity_list = cl.get_entity_list();
-		uintptr_t local_pawn = cl.get_local_pawn();
+		try {
+			if (!cl.get_client_base()) {
+				std::cout << "global: client base not found, exiting..." << std::endl;
+				exit(0);
+			}
+			std::cout << "webapp: refreshing data" << std::endl;
+			std::this_thread::sleep_for(std::chrono::milliseconds(cfg.refresh));
+			uintptr_t entity_list = cl.get_entity_list();
+			uintptr_t local_pawn = cl.get_local_pawn();
 
-		int local_team = ent.get_team(cl.get_local_pawn());
-		int local_health = ent.get_health(local_pawn);
-		int local_index;
-		Vector3 local_pos = ent.get_pos(local_pawn);
+			int local_team = ent.get_team(cl.get_local_pawn());
+			int local_health = ent.get_health(local_pawn);
+			int local_index;
+			Vector3 local_pos = ent.get_pos(local_pawn);
 
-		for (int i = 1; i < 64; i++)
-		{	
-			uintptr_t entity_controller = ent.get_entity_controller(i, entity_list);
-			if (!entity_controller) 
-				continue;
+			for (int i = 1; i < 64; i++)
+			{	
+				uintptr_t entity_controller = ent.get_entity_controller(i, entity_list);
+				if (!entity_controller) 
+					continue;
 
-			uintptr_t entity_pawn = ent.get_entity_pawn(entity_controller, entity_list);
-			if (!entity_pawn)
-				continue;
-			
-			if (entity_pawn == local_pawn)
-				local_index = i;
+				uintptr_t entity_pawn = ent.get_entity_pawn(entity_controller, entity_list);
+				if (!entity_pawn)
+					continue;
 
-			Vector3 entity_pos = ent.get_pos(entity_pawn);
-			int entity_team = ent.get_team(entity_pawn);
-			int entity_health = ent.get_health(entity_pawn);
+				if (entity_pawn == local_pawn)
+					local_index = i;
 
-			if (ent.get_pos(entity_pawn).IsZero()) 
-				continue;
+				Vector3 entity_pos = ent.get_pos(entity_pawn);
+				int entity_team = ent.get_team(entity_pawn);
+				int entity_health = ent.get_health(entity_pawn);
 
-			std::string entity_flags = "";
-			if (ent.is_spotted(entity_pawn) & (uint32_t(1) << (local_index - 1))) entity_flags = "spotted";
-			if (ent.is_scoped(entity_pawn)) entity_flags = "scoped";
-			if (ent.is_flashed(entity_pawn)) entity_flags = "flashed";
-			if (ent.is_defusing(entity_pawn)) entity_flags = "defusing";
-			if (ent.is_rescuing(entity_pawn)) entity_flags = "rescuing";
+				if (ent.get_pos(entity_pawn).IsZero()) 
+					continue;
 
-			json entityJson;
-			entityJson["team"] = entity_team;
-			entityJson["health"] = entity_health;
-			entityJson["pos"] = { entity_pos.x, entity_pos.y, entity_pos.z };
-			entityJson["steam"] = sanitize_utf8(std::to_string(ent.get_steam64(entity_controller)));
-			entityJson["loc"] = sanitize_utf8(ent.get_location(entity_pawn));
-			entityJson["name"] = sanitize_utf8(ent.get_name(entity_controller));
-			entityJson["flags"] = sanitize_utf8(entity_flags);
-			entityJson["gun"] = sanitize_utf8(wpn.get_weapon(ent.get_weapon(entity_pawn)));
+				std::string entity_flags = "";
+				if (ent.is_spotted(entity_pawn) & (uint32_t(1) << (local_index - 1))) entity_flags = "spotted";
+				if (ent.is_scoped(entity_pawn)) entity_flags = "scoped";
+				if (ent.is_flashed(entity_pawn)) entity_flags = "flashed";
+				if (ent.is_defusing(entity_pawn)) entity_flags = "defusing";
+				if (ent.is_rescuing(entity_pawn)) entity_flags = "rescuing";
 
-			jsonArray.push_back(entityJson);
+				json entityJson;
+				entityJson["team"] = entity_team;
+				entityJson["health"] = entity_health;
+				entityJson["pos"] = { entity_pos.x, entity_pos.y, entity_pos.z };
+				entityJson["steam"] = sanitize_utf8(std::to_string(ent.get_steam64(entity_controller)));
+				entityJson["loc"] = sanitize_utf8(ent.get_location(entity_pawn));
+				entityJson["name"] = sanitize_utf8(ent.get_name(entity_controller));
+				entityJson["flags"] = sanitize_utf8(entity_flags);
+				entityJson["gun"] = sanitize_utf8(wpn.get_weapon(ent.get_weapon(entity_pawn)));
+
+				json_array.push_back(entityJson);
+			}
+
+			json host_json, post_json;
+			host_json["team"] = local_team;
+			host_json["health"] = local_health;
+			host_json["pos"] = { local_pos.x, local_pos.y, local_pos.z };
+			host_json["key"] = cfg.key;
+			host_json["endpoint"] = cfg.ep;
+
+			post_json["host"] = host_json;
+			post_json["entities"] = json_array;
+			if (json_array.size() > 0 && cl.get_game_start() != 0.00f)
+				std::cout << "webapp: " << comms.post_data(post_json, app_url + "/receiver") << std::endl;
+			json_array.clear();
+			host_json.clear();
+			post_json.clear();
+		} catch (const std::exception& e) {
+			std::cerr << "webapp: exception - " << e.what() << std::endl;
+			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 		}
-
-		json hostJson, postJson;
-		hostJson["team"] = local_team;
-		hostJson["health"] = local_health;
-		hostJson["pos"] = { local_pos.x, local_pos.y, local_pos.z };
-		hostJson["key"] = cfg.key;
-		hostJson["endpoint"] = cfg.ep;
-
-		postJson["host"] = hostJson;
-		postJson["entities"] = jsonArray;
-		if (jsonArray.size() > 0 && cl.get_game_start() != 0.00f)
-			std::cout << "webapp: " << comms.post_data(postJson, app_url + "/receiver") << std::endl;
-		jsonArray.clear();
-		postJson.clear();
 	}
 }
 
