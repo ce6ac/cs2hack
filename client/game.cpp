@@ -60,7 +60,7 @@ uintptr_t entity::get_entity_controller(int player, uintptr_t entity_list) {
 	mem.read<uintptr_t>(entity_list + (0x8 * ((player & 0x7FFF) >> 9) + 0x10), entry_ptr);
 	if (!entry_ptr) return 0;
 	uintptr_t controller_ptr;
-	mem.read<uintptr_t>(entry_ptr + 0x78 * (player & 0x1FF), controller_ptr);
+	mem.read<uintptr_t>(entry_ptr + 0x70 * (player & 0x1FF), controller_ptr);
 	if (!controller_ptr) return 0;
 	
 	return controller_ptr;
@@ -73,7 +73,7 @@ uintptr_t entity::get_entity_pawn(uintptr_t controller, uintptr_t entity_list) {
 	mem.read<uintptr_t>(entity_list + 0x8 * ((controller_pawn_ptr & 0x7FFF) >> 9) + 16, list_entry_ptr);
 	if(!list_entry_ptr) return 0;
 	uintptr_t player_pawn;
-	mem.read<uintptr_t>(list_entry_ptr + 0x78 * (controller_pawn_ptr & 0x1FF), player_pawn);
+	mem.read<uintptr_t>(list_entry_ptr + 0x70 * (controller_pawn_ptr & 0x1FF), player_pawn);
 
 	return player_pawn;
 }
@@ -83,7 +83,7 @@ uintptr_t entity::get_entity_pawn_from_id(int entity, uintptr_t entity_list) {
 	mem.read<uintptr_t>(entity_list + (0x8 * (entity >> 9) + 0x10), entry_ptr);
 	if (!entry_ptr) return 0;
 	uintptr_t controller_ptr;
-	mem.read<uintptr_t>(entry_ptr + 0x78 * (entity & 0x1FF), controller_ptr);
+	mem.read<uintptr_t>(entry_ptr + 0x70 * (entity & 0x1FF), controller_ptr);
 	if (!controller_ptr) return 0;
 
 	return controller_ptr;
@@ -132,7 +132,7 @@ int entity::get_shots_fired(uintptr_t local_pawn) {
 }
 
 uintptr_t entity::get_bone_array_ptr(uintptr_t pawn) {
-	uintptr_t m_pBoneArray = 496;
+	uintptr_t m_pBoneArray = 0x210;
 	uintptr_t gamescene, bonearray_ptr;
 	mem.read<uintptr_t>(pawn + offset.m_pGameSceneNode, gamescene); 
 	mem.read<uintptr_t>(gamescene + m_pBoneArray, bonearray_ptr);
