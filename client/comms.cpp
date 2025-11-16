@@ -26,7 +26,7 @@ std::string communications::get_data(const std::string& url) {
 			res = curl_easy_perform(curl);
 
 			if (res != CURLE_OK) {
-				std::cerr << "webapp: (curl error) - " << curl_easy_strerror(res) << std::endl;
+				std::cerr << "webapp: (curl error) - " << curl_easy_strerror(res);
 			} else if (resp.empty()) {
 				std::cerr << "webapp: no data received from the server" << std::endl;
 			}
@@ -68,7 +68,7 @@ std::string communications::post_data(const nlohmann::json& data, const std::str
 
 			res = curl_easy_perform(curl);
 			if (res != CURLE_OK) {
-				std::cerr << "webapp: (curl error) - " << curl_easy_strerror(res) << std::endl;
+				std::cerr << "webapp: (curl error) - " << curl_easy_strerror(res);
 			}
 
 			curl_slist_free_all(headers);

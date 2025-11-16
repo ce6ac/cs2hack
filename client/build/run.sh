@@ -2,9 +2,13 @@
 
 # example run.sh for cs2hack
 
+# offsets
+# -output <string>   - (optional) url for output folder with offsets, below is a2x example url
+
 # server related params
+# -noweb             - disables web functionality
 # -url    <string>   - the url cs2hack server is hosted on
-# -ep     <string>   - the endpoint to display data on on the webserver
+# -ep     <string>   - (optional) the specific endpoint to display data on on the webserver
 # -key    <string>   - the key set on server to accept data
 # -refresh <value>   - time in ms between updates of player data, which also means time in between requests to server
 
@@ -36,4 +40,4 @@ sudo setcap 'CAP_SYS_PTRACE=ep' cs2hack
 -cooldown 80 \
 -w 1440 \
 -h 1080 \
--ep secret \
+-output https://raw.githubusercontent.com/a2x/cs2-dumper/refs/heads/main/output \

@@ -1,5 +1,6 @@
 #include "game.h"
 #include "memory.h"
+#include "offsets.h"
 
 /* client.dll stuff */
 

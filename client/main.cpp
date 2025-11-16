@@ -9,6 +9,7 @@
 #include "comms.h"
 #include "memory.h"
 #include "game.h"
+#include "offsets.h"
 #include "utils/vector.h"
 #include "utils/utils.h"
 #include "include/qmp.h"
@@ -44,7 +45,7 @@ struct config {
 	// global
 	bool team = false;
 
-	// site conifg
+	// site config
 	std::string key = "l33ts3cr3t";
 	std::string ep = "";
 }; static config cfg = {};
@@ -256,101 +257,6 @@ static void run_aim_trigger() {
 	}
 }
 
-#define PARSE_OFFSET(target, jpath) \
-	try { \
-		if (jpath.is_number_integer()) { \
-			target = jpath.get<int>(); \
-			std::cout << "parsed: " #target " 0x" << std::hex << target << std::endl; \
-		} else { \
-			std::cerr << "warning: " #target " is not an integer (null or wrong type)" << std::endl; \
-		} \
-	} catch (const std::exception& e) { \
-		std::cerr << "error parsing " #target ": " << e.what() << std::endl; \
-	}
-
-bool get_offsets() {
-	std::string offset_json = comms.get_data("https://raw.githubusercontent.com/a2x/cs2-dumper/refs/heads/main/output/offsets.json");
-	if (offset_json.empty()) return false;
-
-	try {
-		auto parsed = json::parse(offset_json);
-		if (parsed.contains("client.dll")) {
-			std::cout << "global: parsing offsets.json" << std::endl;
-
-			PARSE_OFFSET(offset.dwEntityList, parsed["client.dll"]["dwEntityList"]);
-			PARSE_OFFSET(offset.dwGameRules, parsed["client.dll"]["dwGameRules"]);
-			PARSE_OFFSET(offset.dwLocalPlayerPawn, parsed["client.dll"]["dwLocalPlayerPawn"]);
-			PARSE_OFFSET(offset.dwViewMatrix, parsed["client.dll"]["dwViewMatrix"]);
-		} else return false;
-	} catch (const std::exception& e) {
-		std::cerr << "offsets.json error: " << e.what() << std::endl;
-	}
-
-	std::string clientdll_json = comms.get_data("https://raw.githubusercontent.com/a2x/cs2-dumper/refs/heads/main/output/client_dll.json");
-	if (clientdll_json.empty()) return false;
-
-	try {
-		auto parsed = json::parse(clientdll_json);
-		if (parsed.contains("client.dll")) {
-			std::cout << "global: parsing client_dll.json" << std::endl;
-
-			// C_BaseEntity
-			PARSE_OFFSET(offset.m_iHealth, parsed["client.dll"]["classes"]["C_BaseEntity"]["fields"]["m_iHealth"]);
-			PARSE_OFFSET(offset.m_iTeamNum, parsed["client.dll"]["classes"]["C_BaseEntity"]["fields"]["m_iTeamNum"]);
-			PARSE_OFFSET(offset.m_pGameSceneNode, parsed["client.dll"]["classes"]["C_BaseEntity"]["fields"]["m_pGameSceneNode"]);
-
-			// C_CSPlayerPawn
-			PARSE_OFFSET(offset.m_szLastPlaceName, parsed["client.dll"]["classes"]["C_CSPlayerPawn"]["fields"]["m_szLastPlaceName"]);
-			PARSE_OFFSET(offset.m_entitySpottedState, parsed["client.dll"]["classes"]["C_CSPlayerPawn"]["fields"]["m_entitySpottedState"]);
-			PARSE_OFFSET(offset.m_bIsScoped, parsed["client.dll"]["classes"]["C_CSPlayerPawn"]["fields"]["m_bIsScoped"]);
-			PARSE_OFFSET(offset.m_bIsDefusing, parsed["client.dll"]["classes"]["C_CSPlayerPawn"]["fields"]["m_bIsDefusing"]);
-			PARSE_OFFSET(offset.m_bIsGrabbingHostage, parsed["client.dll"]["classes"]["C_CSPlayerPawn"]["fields"]["m_bIsGrabbingHostage"]);
-			PARSE_OFFSET(offset.m_iShotsFired, parsed["client.dll"]["classes"]["C_CSPlayerPawn"]["fields"]["m_iShotsFired"]);
-			PARSE_OFFSET(offset.m_pClippingWeapon, parsed["client.dll"]["classes"]["C_CSPlayerPawn"]["fields"]["m_pClippingWeapon"]);
-			PARSE_OFFSET(offset.m_iIDEntIndex, parsed["client.dll"]["classes"]["C_CSPlayerPawn"]["fields"]["m_iIDEntIndex"]);
-
-			// CBasePlayerController
-			PARSE_OFFSET(offset.m_iszPlayerName, parsed["client.dll"]["classes"]["CBasePlayerController"]["fields"]["m_iszPlayerName"]);
-			PARSE_OFFSET(offset.m_steamID, parsed["client.dll"]["classes"]["CBasePlayerController"]["fields"]["m_steamID"]);
-
-			// CCSPlayerController
-			PARSE_OFFSET(offset.m_hPlayerPawn, parsed["client.dll"]["classes"]["CCSPlayerController"]["fields"]["m_hPlayerPawn"]);
-
-			// C_CSPlayerPawnBase
-			PARSE_OFFSET(offset.m_flFlashOverlayAlpha, parsed["client.dll"]["classes"]["C_CSPlayerPawnBase"]["fields"]["m_flFlashOverlayAlpha"]);
-
-			// C_BasePlayerPawn
-			PARSE_OFFSET(offset.m_vOldOrigin, parsed["client.dll"]["classes"]["C_BasePlayerPawn"]["fields"]["m_vOldOrigin"]);
-
-			// Weapon-related
-			PARSE_OFFSET(offset.m_AttributeManager, parsed["client.dll"]["classes"]["C_EconEntity"]["fields"]["m_AttributeManager"]);
-			PARSE_OFFSET(offset.m_Item,	parsed["client.dll"]["classes"]["C_AttributeContainer"]["fields"]["m_Item"]);
-			PARSE_OFFSET(offset.m_iItemDefinitionIndex, parsed["client.dll"]["classes"]["C_EconItemView"]["fields"]["m_iItemDefinitionIndex"]);
-
-		} else return false;
-	} catch (const std::exception& e) {
-		std::cerr << "client_dll.json error: " << e.what() << std::endl;
-	}
-
-	std::string buttons_json = comms.get_data("https://raw.githubusercontent.com/a2x/cs2-dumper/refs/heads/main/output/buttons.json");
-	if (buttons_json.empty()) return false;
-
-	try {
-		auto parsed = json::parse(buttons_json);
-		if (parsed.contains("client.dll")) {
-			std::cout << "global: parsing buttons.json" << std::endl;
-
-			PARSE_OFFSET(offset.attack_btn, parsed["client.dll"]["attack"]);
-			PARSE_OFFSET(offset.use_btn,	parsed["client.dll"]["use"]);
-		} else return false;
-	} catch (const std::exception& e) {
-		std::cerr << "buttons.json error: " << e.what() << std::endl;
-	}
-
-	return true;
-}
-
-
 void read_param_config(int argc, char *argv[]) {
 	std::cout << std::dec;
 	for (int i = 0; i < argc; ++i) {
@@ -380,6 +286,12 @@ void read_param_config(int argc, char *argv[]) {
 				json key;
 				key["key"] = cfg.key;
 				std::cout << "webapp: " << comms.post_data(key, app_url + "/testkey") << std::endl;
+			}
+		}
+		else if (strcmp(argv[i], "-output") == 0) {
+			if (i + 1 < argc) {
+				offset.output_url = argv[i + 1];
+				std::cout << "config: output folder is " << offset.output_url << std::endl;
 			}
 		}
 		else if (strcmp(argv[i], "-port") == 0) {
@@ -448,12 +360,12 @@ void read_param_config(int argc, char *argv[]) {
 }
 
 int main(int argc, char *argv[]) {
-	if (!get_offsets()) {
+	read_param_config(argc, argv);
+
+	if (!offset.get_offsets(comms)) {
 		std::cout << "global: could not get offsets, exiting..." << std::endl;
 		return 0;
 	}
-
-	read_param_config(argc, argv);
 
 	while (true) {
 		if (mem.get_proc_status() != process_status::FOUND_READY) {
@@ -471,7 +383,10 @@ int main(int argc, char *argv[]) {
 					} else {
 						std::cout << "global: could not connect to qmp, aim/trigger unavailable" << std::endl;
 					}
-					if (!cfg.ep.empty() && cfg.web) {
+					if (cfg.web) {
+						if (cfg.ep.empty()) {
+							cfg.ep = random_string(16);
+						}
 						std::cout << "global: info page should be " << app_url << "/" << cfg.ep << std::endl;
 					}
 					run_info_esp();

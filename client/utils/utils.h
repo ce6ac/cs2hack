@@ -20,6 +20,19 @@ float random_float(float min, float max) {
     return min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX) / (max - min));
 }
 
+std::string random_string(size_t length) {
+	seed_random();
+    const char charset[] = "abcdef0123456789";
+
+    std::string result;
+    result.reserve(length);
+
+    for (size_t i = 0; i < length; i++)
+        result += charset[rand() % (sizeof(charset) - 1)];
+
+    return result;
+}
+
 std::string sanitize_utf8(const std::string& input) {
 	try {
 		std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
