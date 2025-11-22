@@ -9,7 +9,7 @@
 qemu::qmp::qmp()
 		: connected_(false),
 			socket_(0) {}
- 
+
 bool qemu::qmp::setup(std::string_view address, uint32_t port) {
 	if (connected_) {
 		printf("qmp: connection is already open");
@@ -39,6 +39,9 @@ bool qemu::qmp::setup(std::string_view address, uint32_t port) {
 	}
  
 	connected_ = true;
+
+	drain();
+
 	return true;
 }
  
@@ -93,11 +96,36 @@ bool qemu::qmp::move_mouse(int32_t delta_x, int32_t delta_y) const {
 }
  
 bool qemu::qmp::send_cmd(std::string_view cmd) const {
-	size_t sent = send(socket_, cmd.data(), cmd.size(), 0);
-	return sent == cmd.size();
+    std::string msg(cmd);
+    msg.push_back('\n');
+
+    size_t sent = send(socket_, msg.data(), msg.size(), 0);
+    if (sent != msg.size()) {
+        return false;
+    }
+
+    drain();
+
+    return true;
 }
 
 /* own addition */
+
+void qemu::qmp::drain() const {
+    char buf[1024];
+
+    for (;;) {
+        ssize_t n = recv(socket_, buf, sizeof(buf), MSG_DONTWAIT);
+        if (n > 0) {
+            continue;
+        }
+
+        if (n == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+            break;
+        }
+        break;
+    }
+}
 
 bool qemu::qmp::mouse_down() const {
 	if (!connected_) {

@@ -12,7 +12,7 @@ namespace qemu {
 class qmp {
  public:
 	qmp();
- 
+
 	bool setup(std::string_view address, uint32_t port);
  
 	void disconnect();
@@ -22,6 +22,8 @@ class qmp {
 	bool move_mouse(int32_t delta_x, int32_t delta_y) const;
 
 	/* own addition */
+
+	void drain() const;
 
 	bool mouse_down() const;
 
