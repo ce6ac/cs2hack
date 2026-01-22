@@ -133,7 +133,7 @@ int entity::get_shots_fired(uintptr_t local_pawn) {
 }
 
 uintptr_t entity::get_bone_array_ptr(uintptr_t pawn) {
-	uintptr_t m_pBoneArray = 0x210;
+	uintptr_t m_pBoneArray = offset.m_modelState + 0x80;
 	uintptr_t gamescene, bonearray_ptr;
 	mem.read<uintptr_t>(pawn + offset.m_pGameSceneNode, gamescene); 
 	mem.read<uintptr_t>(gamescene + m_pBoneArray, bonearray_ptr);

@@ -35,6 +35,7 @@ class offsets {
 	    std::ptrdiff_t m_pClippingWeapon;
 	    std::ptrdiff_t m_iIDEntIndex;
 	    std::ptrdiff_t m_pGameSceneNode;
+		std::ptrdiff_t m_modelState;
 
 	    // weapon stuff
 	    std::ptrdiff_t m_AttributeManager;

@@ -71,6 +71,9 @@ bool offsets::get_offsets(communications& comms) {
 			// C_BasePlayerPawn
 			parse_offset(offset.m_vOldOrigin, parsed["client.dll"]["classes"]["C_BasePlayerPawn"]["fields"]["m_vOldOrigin"], "oldorigin");
 
+			// CSkeletonInstance
+			parse_offset(offset.m_modelState, parsed["client.dll"]["classes"]["CSkeletonInstance"]["fields"]["m_modelState"], "modelstate");
+
 			// Weapon-related
 			parse_offset(offset.m_AttributeManager, parsed["client.dll"]["classes"]["C_EconEntity"]["fields"]["m_AttributeManager"], "attributemanager");
 			parse_offset(offset.m_Item,	parsed["client.dll"]["classes"]["C_AttributeContainer"]["fields"]["m_Item"], "item");
