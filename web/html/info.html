@@ -13,8 +13,11 @@
             padding-top: 30px;
         }
         .bar {
-            display: block;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             width: 100%;
+			box-sizing: border-box;
             background: rgb(26, 26, 26);
             color: white;
             padding: 10px;
@@ -26,6 +29,13 @@
             left: 0;
             z-index: 1000;
         }
+		
+		#latencyValue {
+            font-weight: normal;   /* override bold */
+            font-size: 13px;       /* smaller text */
+            opacity: 0.85;         /* slightly subtle */
+        }
+
         .message {
             display: none;
         }
@@ -176,7 +186,10 @@
     </style>
 </head>
 <body>
-    <header class="bar">cs2 hack</header>
+    <header class="bar">
+        <span>cs2 hack</span>
+        <span id="latencyValue">no connection</span>
+    </header>
     <h1>inactive</h1>
     <p class="message">no data for this session yet</p>
     <div class="settings">

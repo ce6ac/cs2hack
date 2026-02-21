@@ -26,6 +26,28 @@ function getSettings() {
 
 window.onload = getSettings;
 
+let lastUpdateAt = 0;
+let avgLatencyMs = 0;
+let latencySamples = 0;
+let offlineTimer = null;
+
+function updateLatencyDisplay(text) {
+    const el = document.getElementById('latencyValue');
+    if (!el) return;
+    el.textContent = text;
+}
+
+function resetOfflineTimer() {
+    if (offlineTimer) clearTimeout(offlineTimer);
+
+    offlineTimer = setTimeout(() => {
+        updateLatencyDisplay('no connection');
+        lastUpdateAt = 0;
+        avgLatencyMs = 0;
+        latencySamples = 0;
+    }, 3000);
+}
+
 function assemble() {
     const existingPlayerList = document.getElementById('playerlist');
 
@@ -284,6 +306,21 @@ socket.on(ep, (data) => {
         row.appendChild(nameCell);
         tableBody.appendChild(row);
     }
+    const now = performance.now();
+    
+    if (lastUpdateAt !== 0) {
+        const dt = now - lastUpdateAt;
+    
+        latencySamples = Math.min(latencySamples + 1, 200);
+        avgLatencyMs = avgLatencyMs === 0
+            ? dt
+            : (avgLatencyMs * (latencySamples - 1) + dt) / latencySamples;
+    
+        updateLatencyDisplay(`${Math.round(avgLatencyMs)} ms`);
+    }
+    
+    lastUpdateAt = now;
+    resetOfflineTimer();
 });
 
 window.addEventListener('resize', reset);
