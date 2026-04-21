@@ -87,7 +87,7 @@ static void run_info_esp() {
 					continue;
 
 				std::string entity_flags = "";
-				//if (ent.is_spotted(entity_pawn) & (uint32_t(1) << (local_index - 1))) entity_flags = "spotted";
+				if (ent.is_spotted(entity_pawn) & (uint32_t(1) << (local_index - 1))) entity_flags = "spotted";
 				if (ent.is_scoped(entity_pawn)) entity_flags = "scoped";
 				if (ent.is_flashed(entity_pawn)) entity_flags = "flashed";
 				if (ent.is_defusing(entity_pawn)) entity_flags = "defusing";
@@ -101,7 +101,7 @@ static void run_info_esp() {
 				entityJson["loc"] = sanitize_utf8(ent.get_location(entity_pawn));
 				entityJson["name"] = sanitize_utf8(ent.get_name(entity_controller));
 				entityJson["flags"] = sanitize_utf8(entity_flags);
-				entityJson["gun"] = sanitize_utf8(wpn.get_weapon(ent.get_weapon(entity_pawn)));
+				entityJson["gun"] = sanitize_utf8(wpn.get_weapon(ent.get_weapon(entity_pawn, entity_list)));
 
 				json_array.push_back(entityJson);
 			}
@@ -146,14 +146,14 @@ static void run_aim_trigger() {
 
 		int entity_id = ent.get_crosshair_id(local_pawn);
 		int local_team = ent.get_team(local_pawn);
+		uintptr_t entity_list = cl.get_entity_list();
+		short weapon_type = wpn.get_type(ent.get_weapon(local_pawn, entity_list));
 
-		short weapon_type = wpn.get_type(ent.get_weapon(local_pawn));
 		if (weapon_type < 1)
 			continue;
 
 		// triggerbot
 		if (cl.use_button_down() && entity_id) {
-			uintptr_t entity_list = cl.get_entity_list();
 			uintptr_t entity_pawn = ent.get_entity_pawn_from_id(entity_id, entity_list);
 			int entity_team = ent.get_team(entity_pawn);
 			int entity_health = ent.get_health(entity_pawn);
@@ -177,8 +177,7 @@ static void run_aim_trigger() {
 
 			if (ent.get_shots_fired(local_pawn) > cfg.shots)
 				continue;
-
-			uintptr_t entity_list = cl.get_entity_list();
+				
 			if (!entity_list) 
 				continue;
 
@@ -243,16 +242,17 @@ static void run_aim_trigger() {
 
 			if (closest_dist > cfg.fov)
 				continue;
-
+				
 			closest_point.x -= center.x + random_float(-0.5f, 0.5f);
 			closest_point.y -= center.y + (-random_float(-0.5f, 0.5f));
 
 			if (cfg.smooth) {
-				closest_point.x /= (weapon_type == 1 ? 3.5f : 0.f) + (cfg.smooth + 1.1f) + (-random_float(-0.5f, 0.5f));
-				closest_point.y /= (weapon_type == 1 ? 3.5f : 0.f) + (cfg.smooth + 1.1f) + random_float(-0.5f, 0.5f);
+				closest_point.x /= (weapon_type == 1 ? 4.f : 0.f) + (cfg.smooth + 1.1f) + (-random_float(-0.5f, 0.5f));
+				closest_point.y /= (weapon_type == 1 ? 4.f : 0.f) + (cfg.smooth + 1.1f) + random_float(-0.5f, 0.5f);
 			}
-			
-			qmp.move_mouse(closest_point.x, closest_point.y);
+            
+            
+            qmp.move_mouse((int)closest_point.x, (int)closest_point.y);
 		}
 	}
 }

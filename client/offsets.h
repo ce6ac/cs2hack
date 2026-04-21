@@ -32,12 +32,13 @@ class offsets {
 	    std::ptrdiff_t m_bIsGrabbingHostage;
 	    std::ptrdiff_t m_iShotsFired;
 	    std::ptrdiff_t m_vOldOrigin;
-	    std::ptrdiff_t m_pClippingWeapon;
+	    std::ptrdiff_t m_pWeaponServices;
 	    std::ptrdiff_t m_iIDEntIndex;
 	    std::ptrdiff_t m_pGameSceneNode;
 		std::ptrdiff_t m_modelState;
 
 	    // weapon stuff
+		std::ptrdiff_t m_hActiveWeapon;
 	    std::ptrdiff_t m_AttributeManager;
 	    std::ptrdiff_t m_Item;
 	    std::ptrdiff_t m_iItemDefinitionIndex;

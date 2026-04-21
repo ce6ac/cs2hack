@@ -71,7 +71,7 @@ uintptr_t entity::get_entity_pawn(uintptr_t controller, uintptr_t entity_list) {
 	uintptr_t controller_pawn_ptr;
 	mem.read<uintptr_t>(controller + offset.m_hPlayerPawn, controller_pawn_ptr);
 	uintptr_t list_entry_ptr; 
-	mem.read<uintptr_t>(entity_list + 0x8 * ((controller_pawn_ptr & 0x7FFF) >> 9) + 16, list_entry_ptr);
+	mem.read<uintptr_t>(entity_list + 0x8 * ((controller_pawn_ptr & 0x7FFF) >> 9) + 0x10, list_entry_ptr);
 	if(!list_entry_ptr) return 0;
 	uintptr_t player_pawn;
 	mem.read<uintptr_t>(list_entry_ptr + 0x70 * (controller_pawn_ptr & 0x1FF), player_pawn);
@@ -148,7 +148,6 @@ Vector3 entity::get_3d_bone_pos(uintptr_t bonearray, int bone) {
 }
 
 uint32_t entity::is_spotted(uintptr_t pawn) {
-	// m_bSpottedByMask = 0xC
 	uint32_t spotted;
 	mem.read<uint32_t>(pawn + offset.m_entitySpottedState + 0xC, spotted);
 	return spotted;
@@ -184,11 +183,19 @@ Vector3 entity::get_pos(uintptr_t pawn) {
 	return pos;
 }
 
-uint16_t entity::get_weapon(uintptr_t pawn) {
-	uintptr_t entity_weapon;
-	mem.read<uintptr_t>(pawn + offset.m_pClippingWeapon, entity_weapon);
+uint16_t entity::get_weapon(uintptr_t pawn, uintptr_t entity_list) {
+	uintptr_t weapon_svc, weapon_handle;
+	mem.read<uintptr_t>(pawn + offset.m_pWeaponServices, weapon_svc);
+	mem.read<uintptr_t>(weapon_svc + offset.m_hActiveWeapon, weapon_handle);
+	if (weapon_handle == 0 || weapon_handle == 0xFFFFFFFF) return 0;
+
+	uintptr_t weapon_entity, weapon_addr;
+	mem.read<uintptr_t>(entity_list + 0x8 * ((weapon_handle & 0x7FFF) >> 9) + 0x10, weapon_entity);
+	if (!weapon_entity) return 0;
+	mem.read<uintptr_t>(weapon_entity + 0x70 * (weapon_handle & 0x1FF), weapon_addr);
+	if (!weapon_addr) return 0;
 	uint16_t entity_item;
-	mem.read<uint16_t>(entity_weapon + offset.m_AttributeManager + offset.m_Item + offset.m_iItemDefinitionIndex, entity_item);
+	mem.read<uint16_t>(weapon_addr + offset.m_AttributeManager + offset.m_Item + offset.m_iItemDefinitionIndex, entity_item);
 	return entity_item;
 }
 
