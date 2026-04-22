@@ -1,6 +1,7 @@
 .vscode/
 
 client/memflow/
+client/deps/
 client/build/
 client/build/run.sh
 

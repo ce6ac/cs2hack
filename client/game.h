@@ -30,6 +30,7 @@ public:
 	int get_team(uintptr_t pawn);
 	int get_health(uintptr_t pawn);
 	Vector3 get_pos(uintptr_t pawn);
+	Vector3 get_eye_angles(uintptr_t pawn);
 	std::string get_location(uintptr_t pawn);
 	std::string get_name(uintptr_t controller);
 	uint64_t get_steam64(uintptr_t controller);

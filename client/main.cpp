@@ -52,6 +52,17 @@ struct config {
 
 static void run_info_esp() {
 	json json_array = json::array();
+    std::string ws_url = app_url;
+
+	if (ws_url.rfind("https://", 0) == 0)
+	    ws_url.replace(0, 5, "wss");
+	else if (ws_url.rfind("http://", 0) == 0)
+	    ws_url.replace(0, 4, "ws");
+	
+	ws_url += "/ws";
+	
+	comms.ws_connect(ws_url);
+
 	while (true) {
 		if (!cfg.web)
 			continue;
@@ -80,6 +91,7 @@ static void run_info_esp() {
 					local_index = i;
 
 				Vector3 entity_pos = ent.get_pos(entity_pawn);
+				Vector3 entity_eyes = ent.get_eye_angles(entity_pawn);
 				int entity_team = ent.get_team(entity_pawn);
 				int entity_health = ent.get_health(entity_pawn);
 
@@ -97,30 +109,36 @@ static void run_info_esp() {
 				entityJson["team"] = entity_team;
 				entityJson["health"] = entity_health;
 				entityJson["pos"] = { entity_pos.x, entity_pos.y, entity_pos.z };
+				entityJson["eyes"] = { entity_eyes.x, entity_eyes.y, entity_eyes.z };
 				entityJson["steam"] = sanitize_utf8(std::to_string(ent.get_steam64(entity_controller)));
 				entityJson["loc"] = sanitize_utf8(ent.get_location(entity_pawn));
 				entityJson["name"] = sanitize_utf8(ent.get_name(entity_controller));
 				entityJson["flags"] = sanitize_utf8(entity_flags);
 				entityJson["gun"] = sanitize_utf8(wpn.get_weapon(ent.get_weapon(entity_pawn, entity_list)));
+				entityJson["eye"] = entity_team;
 
 				json_array.push_back(entityJson);
 			}
 
-			json host_json, post_json;
+			json host_json;
 			host_json["team"] = local_team;
 			host_json["health"] = local_health;
 			host_json["pos"] = { local_pos.x, local_pos.y, local_pos.z };
 			host_json["key"] = cfg.key;
 			host_json["endpoint"] = cfg.ep;
 
-			post_json["host"] = host_json;
-			post_json["entities"] = json_array;
-			if (json_array.size() > 0 && host_json.size() > 0 && post_json.size() > 0) {
-				std::cout << "webapp: " << comms.post_data(post_json, app_url + "/receiver") << std::endl;
-			}
+            if (json_array.size() > 0) {
+                json payload;
+                payload["host"] = host_json;
+                payload["entities"] = json_array;
+
+                if (!comms.ws_send(payload)) {
+                    std::cerr << "webapp: ws send failed (reconnecting...)" << std::endl;
+                }
+				payload.clear();
+            }
 			json_array.clear();
 			host_json.clear();
-			post_json.clear();
 		} catch (const std::exception& e) {
 			std::cerr << "webapp: exception - " << e.what() << std::endl;
 			std::this_thread::sleep_for(std::chrono::milliseconds(1000));

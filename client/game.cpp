@@ -108,6 +108,12 @@ std::string entity::get_location(uintptr_t pawn) {
 	return place;
 }
 
+Vector3 entity::get_eye_angles(uintptr_t pawn) {
+	Vector3 ang;
+	mem.read<Vector3>(pawn + offset.m_angEyeAngles, ang);
+	return ang;
+}
+
 std::string entity::get_name(uintptr_t controller) {
 	char name[128];
 	mem.read_array<char>(controller + offset.m_iszPlayerName, &name[0], 128);

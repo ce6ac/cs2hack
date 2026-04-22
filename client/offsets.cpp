@@ -49,6 +49,7 @@ bool offsets::get_offsets(communications& comms) {
 			parse_offset(offset.m_pGameSceneNode, parsed["client.dll"]["classes"]["C_BaseEntity"]["fields"]["m_pGameSceneNode"], "gamescenenode");
 
 			// C_CSPlayerPawn
+			parse_offset(offset.m_angEyeAngles, parsed["client.dll"]["classes"]["C_CSPlayerPawn"]["fields"]["m_angEyeAngles"], "eyeangles");
 			parse_offset(offset.m_szLastPlaceName, parsed["client.dll"]["classes"]["C_CSPlayerPawn"]["fields"]["m_szLastPlaceName"], "lastplacename");
 			parse_offset(offset.m_entitySpottedState, parsed["client.dll"]["classes"]["C_CSPlayerPawn"]["fields"]["m_entitySpottedState"], "spottedstate");
 			parse_offset(offset.m_bIsScoped, parsed["client.dll"]["classes"]["C_CSPlayerPawn"]["fields"]["m_bIsScoped"], "isscoped");

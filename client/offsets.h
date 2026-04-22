@@ -21,6 +21,7 @@ class offsets {
 	    // entity
 	    std::ptrdiff_t m_iHealth;
 	    std::ptrdiff_t m_iTeamNum;
+		std::ptrdiff_t m_angEyeAngles;
 	    std::ptrdiff_t m_szLastPlaceName;
 	    std::ptrdiff_t m_iszPlayerName;
 	    std::ptrdiff_t m_steamID;

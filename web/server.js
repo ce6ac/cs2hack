@@ -3,6 +3,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
 const path = require('path');
+const { WebSocketServer } = require('ws');
 
 const app = express();
 const server = http.createServer(app);
@@ -10,6 +11,38 @@ const io = socketIo(server, {
     cors: {
         origin: '*',
     }
+});
+
+const wss = new WebSocketServer({ noServer: true });
+
+server.on('upgrade', (req, socket, head) => {
+    if (req.url === '/ws') {                        // only hijack /ws
+        wss.handleUpgrade(req, socket, head, (ws) => {
+            wss.emit('connection', ws, req);
+        });
+    }
+});
+
+wss.on('connection', (ws) => {
+    console.log('server: C++ client connected via websocket');
+
+    ws.on('message', (raw) => {
+        try {
+            const data = JSON.parse(raw);
+
+            if (data.host && data.host.endpoint && data.host.key === postKey) {
+                io.emit(data.host.endpoint, data);
+                console.log(`server: ws data received for /${data.host.endpoint}`);
+            } else {
+                console.log('server: bad key on ws message');
+                ws.close();
+            }
+        } catch (e) {
+            console.error('server: bad json -', e.message);
+        }
+    });
+
+    ws.on('close', () => console.log('server: C++ client disconnected'));
 });
 
 app.use(express.static('public'));
