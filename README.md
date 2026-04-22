@@ -1,16 +1,15 @@
 ## cs2hack
 
-cs2 game hack including info esp and aim/trigger powered by input through qmp
+cs2 game hack including info esp, radar (WIP) and aim/trigger powered by input through qmp
 
 a lot could have been better, but since it works just fine and does not get detected on certain 3rd party platforms depending on qemu/kvm setup, i decided to just throw this project on github.
 
 ### credits
 - [ko1N](https://github.com/ko1N), [h33p](https://github.com/h33p) and [emesare](https://github.com/emesare) - memflow
-- [AtomicBool](https://github.com/AtomicBool) - cs2 kvm ware (his implementation of memflow)
-- [nlohmann](https://github.com/nlohmann) - json
 - [a2x](https://github.com/a2x) - cs2 offset dumper
-- [h3rx](https://www.unknowncheats.me/forum/members/2460597.html) - qemouse (qmp wrapper found on UC)
+- [h3rx](https://www.unknowncheats.me/forum/members/2460597.html) - QeMouse
 - [horror](https://github.com/horrified-dev) - all inspiration to get into qemu/kvm gaming ;)
+- contributors of [curl](https://github.com/curl/curl), [IXWebSocket](https://github.com/machinezone/IXWebSocket) and [JSON for C++](https://github.com/nlohmann/json)
 
 ## setup 
 to get setup, we're assuming you have a qemu/kvm gaming setup already
@@ -26,11 +25,11 @@ node server.js
 ```
 
 #### client
-to build the client, run the build.sh script inside of client folder to build everything including memflow
+to build the client, run the build.sh script inside of client folder to download dependencies and build everything
 ```
 ./build.sh
 ```
-head into build folder, modify run.sh to configure
+head into build folder, modify run.sh to your preferences/needs
 ```
 cd build
 nano run.sh
@@ -55,4 +54,4 @@ triggerbot key is your use key in-game, to bind it use cs2 command
 ```
 bind <key> +use
 ```
-aimbot is enabled for the first X shots defined by -shots param defined in [run.sh](https://github.com/ce6ac/cs2hack/blob/main/client/build/run.sh)
+aimbot is enabled for the first X shots defined by -shots argument defined in [run.sh](https://github.com/ce6ac/cs2hack/blob/main/client/build/run.sh)
