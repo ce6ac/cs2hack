@@ -59,6 +59,7 @@ bool offsets::get_offsets(communications& comms) {
 			parse_offset(offset.m_iIDEntIndex, parsed["client.dll"]["classes"]["C_CSPlayerPawn"]["fields"]["m_iIDEntIndex"], "identindex");
 
 			// CBasePlayerController
+			parse_offset(offset.m_hPawn, parsed["client.dll"]["classes"]["CBasePlayerController"]["fields"]["m_hPawn"], "pawn");
 			parse_offset(offset.m_iszPlayerName, parsed["client.dll"]["classes"]["CBasePlayerController"]["fields"]["m_iszPlayerName"], "playername");
 			parse_offset(offset.m_steamID, parsed["client.dll"]["classes"]["CBasePlayerController"]["fields"]["m_steamID"], "steamid");
 
@@ -70,12 +71,16 @@ bool offsets::get_offsets(communications& comms) {
 
 			// C_BasePlayerPawn
 			parse_offset(offset.m_vOldOrigin, parsed["client.dll"]["classes"]["C_BasePlayerPawn"]["fields"]["m_vOldOrigin"], "oldorigin");
+			parse_offset(offset.m_pObserverServices, parsed["client.dll"]["classes"]["C_BasePlayerPawn"]["fields"]["m_pObserverServices"], "observerservices");
 			parse_offset(offset.m_pWeaponServices, parsed["client.dll"]["classes"]["C_BasePlayerPawn"]["fields"]["m_pWeaponServices"], "weaponservices");
+
+			// spec-related
+			parse_offset(offset.m_hObserverTarget, parsed["client.dll"]["classes"]["CPlayer_ObserverServices"]["fields"]["m_hObserverTarget"], "observertarget");
 
 			// CSkeletonInstance
 			parse_offset(offset.m_modelState, parsed["client.dll"]["classes"]["CSkeletonInstance"]["fields"]["m_modelState"], "modelstate");
 
-			// Weapon-related
+			// weapon-related
 			parse_offset(offset.m_hActiveWeapon, parsed["client.dll"]["classes"]["CPlayer_WeaponServices"]["fields"]["m_hActiveWeapon"], "activeweapon");
 			parse_offset(offset.m_AttributeManager, parsed["client.dll"]["classes"]["C_EconEntity"]["fields"]["m_AttributeManager"], "attributemanager");
 			parse_offset(offset.m_Item,	parsed["client.dll"]["classes"]["C_AttributeContainer"]["fields"]["m_Item"], "item");

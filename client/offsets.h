@@ -25,6 +25,7 @@ class offsets {
 	    std::ptrdiff_t m_szLastPlaceName;
 	    std::ptrdiff_t m_iszPlayerName;
 	    std::ptrdiff_t m_steamID;
+		std::ptrdiff_t m_hPawn;
 	    std::ptrdiff_t m_hPlayerPawn;
 	    std::ptrdiff_t m_flFlashOverlayAlpha;
 	    std::ptrdiff_t m_entitySpottedState;
@@ -34,6 +35,8 @@ class offsets {
 	    std::ptrdiff_t m_iShotsFired;
 	    std::ptrdiff_t m_vOldOrigin;
 	    std::ptrdiff_t m_pWeaponServices;
+		std::ptrdiff_t m_pObserverServices;
+		std::ptrdiff_t m_hObserverTarget;
 	    std::ptrdiff_t m_iIDEntIndex;
 	    std::ptrdiff_t m_pGameSceneNode;
 		std::ptrdiff_t m_modelState;

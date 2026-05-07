@@ -44,6 +44,8 @@
         #playerlist,
         #radarbox,
         #settingsbox {
+            top: 41px;
+            left: 0;
             position: absolute;
             background: rgb(44, 44, 44);
             color: white;
@@ -51,29 +53,28 @@
             box-sizing: border-box;
             z-index: 1;
         }
-    
+        #radarbox {
+            top: 41px;
+            left: 0;
+            width: 320px;
+            height: 320px;
+            display: flex;
+            flex-direction: column;
+        }
+        
         #playerlist {
             top: 41px;
             left: 0;
+            width: 520px;
             min-height: 20px;
             min-width: 300px;
             display: flex;
             flex-direction: column;
         }
-    
-        #radarbox {
-            width: 320px;
-            height: 320px;
-            display: flex;
-            flex-direction: column;
-            left: calc(50% + 12px);
-            top: 41px;
-        }
-    
+        
         #settingsbox {
-            width: 220px;
-            left: calc(100% - 232px);
-            top: calc(100% - 90px);
+            top: 41px;
+            width: 275px;
         }
     
         .title {
@@ -104,11 +105,11 @@
             cursor: nwse-resize;
         }
     
-        #radarCanvas {
+        #radarcanvas {
             width: 100%;
             height: calc(100% - 31px);
             display: block;
-            background: rgb(30, 30, 30);
+            background: rgb(44, 44, 44);
             flex: 1;
         }
     

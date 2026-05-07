@@ -205,6 +205,12 @@ uint16_t entity::get_weapon(uintptr_t pawn, uintptr_t entity_list) {
 	return entity_item;
 }
 
+uintptr_t entity::get_pawn(uintptr_t controller) {
+	uintptr_t pawn;
+	mem.read<uintptr_t>(controller + offset.m_hPawn, pawn);
+	return pawn;
+}
+
 /* weapon related */
 
 int weapons::get_type(short id) {

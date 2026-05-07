@@ -44,6 +44,7 @@ public:
 	bool is_rescuing(uintptr_t pawn);
 	bool is_flashed(uintptr_t pawn);
 	uint16_t get_weapon(uintptr_t pawn, uintptr_t entity_list);
+	uintptr_t get_pawn(uintptr_t controller);
 };
 
 extern entity ent;

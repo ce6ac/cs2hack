@@ -74,11 +74,12 @@ static void run_info_esp() {
 
 			int local_team = ent.get_team(cl.get_local_pawn());
 			int local_health = ent.get_health(local_pawn);
-			int local_index;
+			int local_index = 0;
 			Vector3 local_pos = ent.get_pos(local_pawn);
 
 			for (int i = 1; i < 64; i++)
 			{	
+
 				uintptr_t entity_controller = ent.get_entity_controller(i, entity_list);
 				if (!entity_controller) 
 					continue;
@@ -90,6 +91,28 @@ static void run_info_esp() {
 				if (entity_pawn == local_pawn)
 					local_index = i;
 
+				// NEED TO CLEAN UP, HOLY UC PASTE
+				Vector3 spec_pos = { 0.f, 0.f, 0.f };
+				Vector3 spec_eyes = { 0.f, 0.f, 0.f };
+				uint32_t spectatorPrePawn = ent.get_pawn(entity_controller);
+				if (spectatorPrePawn) {
+					uintptr_t spectatorPawn = ent.get_entity_controller(spectatorPrePawn, entity_list);
+					uintptr_t obsServices;
+					mem.read<uintptr_t>(spectatorPawn + offset.m_pObserverServices, obsServices);
+					if (obsServices) {
+						uint64_t obsTarget;
+						mem.read<uint64_t>(obsServices + offset.m_hObserverTarget, obsTarget);
+						if (obsTarget) {
+							uintptr_t obsPawn = ent.get_entity_controller(obsTarget, entity_list);
+
+							if (obsServices && obsPawn) {
+								spec_pos = ent.get_pos(obsPawn);
+								spec_eyes = ent.get_eye_angles(obsPawn);
+							}
+						}
+					}
+				}
+
 				Vector3 entity_pos = ent.get_pos(entity_pawn);
 				Vector3 entity_eyes = ent.get_eye_angles(entity_pawn);
 				int entity_team = ent.get_team(entity_pawn);
@@ -98,12 +121,12 @@ static void run_info_esp() {
 				if (ent.get_pos(entity_pawn).IsZero()) 
 					continue;
 
-				std::string entity_flags = "";
-				if (ent.is_spotted(entity_pawn) & (uint32_t(1) << (local_index - 1))) entity_flags = "spotted";
-				if (ent.is_scoped(entity_pawn)) entity_flags = "scoped";
-				if (ent.is_flashed(entity_pawn)) entity_flags = "flashed";
-				if (ent.is_defusing(entity_pawn)) entity_flags = "defusing";
-				if (ent.is_rescuing(entity_pawn)) entity_flags = "rescuing";
+				std::array<bool,5> entity_flags = { false };
+				entity_flags[0] = (ent.is_spotted(entity_pawn) & (uint32_t(1) << (local_index - 1))) != 0;
+				entity_flags[1] = ent.is_scoped(entity_pawn);
+				entity_flags[2] = ent.is_flashed(entity_pawn);
+				entity_flags[3] = ent.is_defusing(entity_pawn);
+				entity_flags[4] = ent.is_rescuing(entity_pawn);
 
 				json entityJson;
 				entityJson["team"] = entity_team;
@@ -113,9 +136,16 @@ static void run_info_esp() {
 				entityJson["steam"] = sanitize_utf8(std::to_string(ent.get_steam64(entity_controller)));
 				entityJson["loc"] = sanitize_utf8(ent.get_location(entity_pawn));
 				entityJson["name"] = sanitize_utf8(ent.get_name(entity_controller));
-				entityJson["flags"] = sanitize_utf8(entity_flags);
 				entityJson["gun"] = sanitize_utf8(wpn.get_weapon(ent.get_weapon(entity_pawn, entity_list)));
-				entityJson["eye"] = entity_team;
+				entityJson["spec_pos"] = { spec_pos.x, spec_pos.y, spec_pos.z };
+				entityJson["spec_eyes"] = { spec_eyes.x, spec_eyes.y, spec_eyes.z };
+				entityJson["flags"] = {
+					entity_flags[0],
+					entity_flags[1],
+					entity_flags[2],
+					entity_flags[3],
+					entity_flags[4]
+				};
 
 				json_array.push_back(entityJson);
 			}

@@ -93,7 +93,7 @@ function resetOfflineTimer() {
     }, 3000);
 }
 
-function assemble() {
+function assemblePlayers() {
     const existingPlayerList = document.getElementById('playerlist');
     if (existingPlayerList) return;
 
@@ -173,7 +173,7 @@ function assembleRadar() {
     title.textContent = 'radar';
 
     const canvas = document.createElement('canvas');
-    canvas.id = 'radarCanvas';
+    canvas.id = 'radarcanvas';
 
     const resizer = document.createElement('div');
     resizer.className = 'resizer';
@@ -185,7 +185,7 @@ function assembleRadar() {
 
     makeDraggable(radarbox, title);
     makeResizableSquare(radarbox, resizer, 180);
-    registerFloatingBox(container, title);
+    registerFloatingBox(radarbox, title);
     syncRadarCanvasSize();
 }
 
@@ -195,10 +195,6 @@ function assembleSettings() {
 
     const settingsbox = document.createElement('div');
     settingsbox.id = 'settingsbox';
-    settingsbox.style.position = 'absolute';
-    settingsbox.style.width = '275px';
-    settingsbox.style.left = 'calc(100% - 232px)';
-    settingsbox.style.top = 'calc(100% - 90px)';
 
     const savedSettings = localStorage.getItem('settingsbox');
     if (savedSettings) {
@@ -248,7 +244,7 @@ function assembleSettings() {
 
 function syncRadarCanvasSize() {
     const radarbox = document.getElementById('radarbox');
-    const canvas = document.getElementById('radarCanvas');
+    const canvas = document.getElementById('radarcanvas');
     if (!radarbox || !canvas) return;
 
     const title = radarbox.querySelector('.title');
@@ -469,7 +465,7 @@ function clamp(value, min, max) {
 }
 
 function drawRadar(centerEntity, entities) {
-    const canvas = document.getElementById('radarCanvas');
+    const canvas = document.getElementById('radarcanvas');
     if (!canvas) return;
 
     syncRadarCanvasSize();
@@ -505,35 +501,55 @@ function drawRadar(centerEntity, entities) {
     ctx.strokeStyle = 'rgb(65, 65, 65)';
     ctx.stroke();
 
-    if (!centerEntity || !centerEntity.pos || centerEntity.health <= 0) {
+    const isAliveCenter = centerEntity && centerEntity.pos && centerEntity.health > 0;
+    
+    const centerPos = isAliveCenter
+        ? centerEntity.pos
+        : centerEntity && Array.isArray(centerEntity.spec_pos)
+            ? centerEntity.spec_pos
+            : null;
+    
+    const centerEyes = isAliveCenter
+        ? centerEntity.eyes
+        : centerEntity && Array.isArray(centerEntity.spec_eyes)
+            ? centerEntity.spec_eyes
+            : centerEntity ? centerEntity.eyes : null;
+    
+    if (!centerPos) {
         ctx.fillStyle = 'white';
         ctx.font = '14px Arial';
-        ctx.fillText('dead/no player', 5, 20);
+        ctx.fillText('no steam64', 5, 20);
         return;
     }
 
     ctx.beginPath();
     ctx.arc(cx, cy, 5, 0, Math.PI * 2);
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = isAliveCenter ? '#ffffff' : '#aaaaaa';
     ctx.fill();
-
+    
     const range = 2500.0;
-
-    const yawDeg = Array.isArray(centerEntity.eyes) ? centerEntity.eyes[1] || 0 : 0;
+    
+    const yawDeg = Array.isArray(centerEyes) ? centerEyes[1] || 0 : 0;
     const yawRad = (yawDeg - 90) * Math.PI / 180;
-
+    
     const cosYaw = Math.cos(-yawRad);
     const sinYaw = Math.sin(-yawRad);
 
     entities.forEach(entity => {
         if (!entity.pos || entity.health <= 0) return;
-        if (entity.steam === centerEntity.steam) return;
+        if (isAliveCenter &&entity.steam === centerEntity.steam) return;
         if (entity.team !== 2 && entity.team !== 3) return;
+        const flags = Array.isArray(entity.flags) ? entity.flags : [];
 
-        const dx = entity.pos[0] - centerEntity.pos[0];
-        const dy = entity.pos[1] - centerEntity.pos[1];
+        const isSpotted = !!flags[0];
+        const isScoped = !!flags[1];
+        const isFlashed = !!flags[2];
+        const isDefusing = !!flags[3];
+        const isRescuing = !!flags[4];
 
-        // Rotate into centerEntity local view space
+        const dx = entity.pos[0] - centerPos[0];
+        const dy = entity.pos[1] - centerPos[1];
+
         const localX = dx * cosYaw - dy * sinYaw;
         const localY = dx * sinYaw + dy * cosYaw;
 
@@ -556,8 +572,29 @@ function drawRadar(centerEntity, entities) {
         ctx.arc(x, y, 4, 0, Math.PI * 2);
         ctx.fillStyle = isEnemy ? '#ff4d4d' : '#4da6ff';
         ctx.fill();
-
-        if (entity.flags && entity.flags.includes('spotted')) {
+        if (isScoped && Array.isArray(entity.eyes)) {
+            const eyeYawDeg = entity.eyes[1] || 0;
+            const eyeYawRad = eyeYawDeg * Math.PI / 180;
+        
+            const dirX = Math.cos(eyeYawRad);
+            const dirY = Math.sin(eyeYawRad);
+        
+            const localDirX = dirX * cosYaw - dirY * sinYaw;
+            const localDirY = dirX * sinYaw + dirY * cosYaw;
+        
+            const lineLength = 75;
+        
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(
+                x + localDirX * lineLength,
+                y - localDirY * lineLength
+            );
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+        if (entity.flags && isSpotted) {
             ctx.beginPath();
             ctx.arc(x, y, 7, 0, Math.PI * 2);
             ctx.strokeStyle = '#ffd24d';
@@ -569,7 +606,7 @@ function drawRadar(centerEntity, entities) {
 const ep = window.location.pathname.slice(1);
 
 socket.on(ep, (data) => {
-    assemble();
+    assemblePlayers();
     assembleRadar();
     assembleSettings();
 
@@ -594,8 +631,15 @@ socket.on(ep, (data) => {
     let targets = 0;
 
     entities.forEach(entity => {
-        if (entity.health > 0 && (entity.team === 2 || entity.team === 3) && host.team !== entity.team) {
+        if (entity.health > 0 && (entity.team === 2 || entity.team === 3) && host.team !== entity.team && specExists) {
             const row = document.createElement('tr');
+            const flags = Array.isArray(entity.flags) ? entity.flags : [];
+
+            const isSpotted = !!flags[0];
+            const isScoped = !!flags[1];
+            const isFlashed = !!flags[2];
+            const isDefusing = !!flags[3];
+            const isRescuing = !!flags[4];
 
             const nameCell = document.createElement('td');
             if (entity.steam != 0) {
@@ -623,12 +667,13 @@ socket.on(ep, (data) => {
 
             const distCell = document.createElement('td');
             distCell.textContent = specExists
-                ? ((specEntity.health > 0) ? dist(specEntity.pos, entity.pos) : '-')
+                ? ((specEntity.health > 0) ? dist(specEntity.pos, entity.pos) : dist(specEntity.spec_pos, entity.pos))
                 : '-';
             row.appendChild(distCell);
 
             const flagsCell = document.createElement('td');
-            flagsCell.textContent = entity.flags || '-';
+            const flagNames = ['seen', 'zoom', 'flashed', 'def', 'res'];
+            flagsCell.textContent = flagNames.filter((_, index) => flags[index]).join(', ') || '-';
             row.appendChild(flagsCell);
 
             tableBody.appendChild(row);
@@ -639,7 +684,7 @@ socket.on(ep, (data) => {
     if (targets === 0) {
         const row = document.createElement('tr');
         const nameCell = document.createElement('td');
-        nameCell.textContent = 'no alive players';
+        nameCell.textContent = specExists ? 'no alive players' : 'no steam64';
         row.appendChild(nameCell);
         tableBody.appendChild(row);
     }
